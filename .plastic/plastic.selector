@@ -1,0 +1,4 @@
+repository "SeventhEcho-Slash/SeventhEcho-Slash@13469927564805@cloud"
+  path "/"
+    br "/main"
+    co "/main"

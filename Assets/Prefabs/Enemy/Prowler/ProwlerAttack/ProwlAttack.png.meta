@@ -1,0 +1,299 @@
+fileFormatVersion: 2
+guid: a88053668183aca4f9a58eead3fda32c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6818376375875366219
+    second: ProwlAttack_0
+  - first:
+      213: 1998927602029357829
+    second: ProwlAttack_1
+  - first:
+      213: -6579066070182874912
+    second: ProwlAttack_2
+  - first:
+      213: -4633776006136778132
+    second: ProwlAttack_3
+  - first:
+      213: 165422152174657914
+    second: ProwlAttack_4
+  - first:
+      213: 2433816808426889604
+    second: ProwlAttack_5
+  - first:
+      213: 6697036435046475465
+    second: ProwlAttack_6
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 123.38
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ProwlAttack_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 975
+        width: 591
+        height: 350
+      alignment: 9
+      pivot: {x: 0.49474123, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b2980bbfc24061a0800000000000000
+      internalID: -6818376375875366219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ProwlAttack_1
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 951
+        width: 592
+        height: 378
+      alignment: 9
+      pivot: {x: 0.4947412, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50beea2301e9dbb10800000000000000
+      internalID: 1998927602029357829
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ProwlAttack_2
+      rect:
+        serializedVersion: 2
+        x: 1498
+        y: 946
+        width: 591
+        height: 391
+      alignment: 9
+      pivot: {x: 0.4947412, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e0bcec344672b4a0800000000000000
+      internalID: -6579066070182874912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ProwlAttack_3
+      rect:
+        serializedVersion: 2
+        x: 744
+        y: 462
+        width: 592
+        height: 392
+      alignment: 9
+      pivot: {x: 0.4947412, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c623d71f54581bfb0800000000000000
+      internalID: -4633776006136778132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ProwlAttack_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1
+        width: 591
+        height: 383
+      alignment: 9
+      pivot: {x: 0.4947412, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a71e95a2292bb4200800000000000000
+      internalID: 165422152174657914
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ProwlAttack_5
+      rect:
+        serializedVersion: 2
+        x: 754
+        y: 1
+        width: 592
+        height: 365
+      alignment: 9
+      pivot: {x: 0.4947412, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 481e8aa0e77a6c120800000000000000
+      internalID: 2433816808426889604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ProwlAttack_6
+      rect:
+        serializedVersion: 2
+        x: 1498
+        y: 9
+        width: 591
+        height: 350
+      alignment: 9
+      pivot: {x: 0.4947412, y: 0.2}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c62bceb727a0fc50800000000000000
+      internalID: 6697036435046475465
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: adb7b386ff0435d458a5012240800ed6
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      ProwlAttack_0: -6818376375875366219
+      ProwlAttack_1: 1998927602029357829
+      ProwlAttack_2: -6579066070182874912
+      ProwlAttack_3: -4633776006136778132
+      ProwlAttack_4: 165422152174657914
+      ProwlAttack_5: 2433816808426889604
+      ProwlAttack_6: 6697036435046475465
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
