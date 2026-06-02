@@ -400,6 +400,8 @@ GameObject:
   - component: {fileID: 33661011}
   - component: {fileID: 33661015}
   - component: {fileID: 33661014}
+  - component: {fileID: 33661013}
+  - component: {fileID: 33661016}
   m_Layer: 3
   m_Name: PerfectRockScriptMovingLR (1)
   m_TagString: Untagged
@@ -416,12 +418,39 @@ Transform:
   m_GameObject: {fileID: 33661010}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 28.78, y: 31.57, z: 0}
+  m_LocalPosition: {x: 28.05, y: 31.57, z: 0}
   m_LocalScale: {x: -0.42733526, y: 0.64986736, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1890040160}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &33661013
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33661010}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!68 &33661014
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -460,7 +489,6 @@ EdgeCollider2D:
   m_EdgeRadius: 0
   m_Points:
   - {x: -4.0455456, y: 1.2354126}
-  - {x: 0.5009232, y: 1.193546}
   - {x: 4.13986, y: 1.1600342}
   m_AdjacentStartPoint: {x: 0, y: 0}
   m_AdjacentEndPoint: {x: 0, y: 0}
@@ -525,6 +553,50 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &33661016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33661010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
+  moveType: 2
+  moveSpeed: 2
+  moveDistance: 4
+  circleRadius: 3
+  circleSpeed: 1
+  diagonalAngleDegrees: 45
+  easeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pauseDuration: 0.3
+  startAtCenter: 0
 --- !u!1 &38379724
 GameObject:
   m_ObjectHideFlags: 0
@@ -810,6 +882,141 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &51118031
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 51118032}
+  - component: {fileID: 51118034}
+  - component: {fileID: 51118033}
+  m_Layer: 3
+  m_Name: TinyRock (21)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &51118032
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51118031}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 81.020004, y: 68.59, z: 0}
+  m_LocalScale: {x: -1.4569222, y: 1.4710081, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1890040160}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!68 &51118033
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51118031}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -0.6986349, y: 0.4582367}
+  - {x: 0.7640951, y: 0.4582367}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
+--- !u!212 &51118034
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 51118031}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 6937817954938267909, guid: 9f447b469b4dc964192425381edf6bd6, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 1
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1.43, y: 1.49}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
 --- !u!1 &65846564
 GameObject:
   m_ObjectHideFlags: 0
@@ -858,6 +1065,8 @@ GameObject:
   - component: {fileID: 72697886}
   - component: {fileID: 72697885}
   - component: {fileID: 72697889}
+  - component: {fileID: 72697888}
+  - component: {fileID: 72697887}
   m_Layer: 3
   m_Name: TinyRock (14)
   m_TagString: Untagged
@@ -874,7 +1083,7 @@ Transform:
   m_GameObject: {fileID: 72697883}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 84.89, y: 29.73, z: 0}
+  m_LocalPosition: {x: 79.15, y: 29.73, z: 0}
   m_LocalScale: {x: -1.4569222, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -982,6 +1191,94 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &72697887
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72697883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
+  moveType: 0
+  moveSpeed: 2
+  moveDistance: 4
+  circleRadius: 3
+  circleSpeed: 1
+  diagonalAngleDegrees: 45
+  easeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pauseDuration: 0.3
+  startAtCenter: 0
+--- !u!114 &72697888
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 72697883}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
+  moveType: 0
+  moveSpeed: 2
+  moveDistance: 4
+  circleRadius: 3
+  circleSpeed: 1
+  diagonalAngleDegrees: 45
+  easeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pauseDuration: 0.3
+  startAtCenter: 0
 --- !u!50 &72697889
 Rigidbody2D:
   serializedVersion: 5
@@ -1387,7 +1684,7 @@ Transform:
   m_GameObject: {fileID: 130099474}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.08066955, w: -0.99674094}
-  m_LocalPosition: {x: 142.4, y: 3.3, z: 0}
+  m_LocalPosition: {x: 162.2, y: 6.1, z: 0}
   m_LocalScale: {x: 1.609738, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1641,7 +1938,6 @@ GameObject:
   - component: {fileID: 151841342}
   - component: {fileID: 151841344}
   - component: {fileID: 151841343}
-  - component: {fileID: 151841345}
   m_Layer: 3
   m_Name: TinyRock (2)
   m_TagString: Untagged
@@ -1766,37 +2062,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &151841345
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 151841341}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 0.5
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.28
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &174065849
 GameObject:
   m_ObjectHideFlags: 0
@@ -1944,7 +2209,6 @@ GameObject:
   - component: {fileID: 187403955}
   - component: {fileID: 187403954}
   - component: {fileID: 187403952}
-  - component: {fileID: 187403956}
   m_Layer: 3
   m_Name: CircleRockUpDown (2)
   m_TagString: Untagged
@@ -1961,7 +2225,7 @@ Transform:
   m_GameObject: {fileID: 187403949}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -88.23001, y: 49.1, z: 0}
+  m_LocalPosition: {x: -88.23001, y: 54.706997, z: 0}
   m_LocalScale: {x: 1.490865, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2096,50 +2360,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &187403956
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 187403949}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
-  moveType: 1
-  moveSpeed: 5
-  moveDistance: 12
-  circleRadius: 3
-  circleSpeed: 1
-  diagonalAngleDegrees: 45
-  easeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  pauseDuration: 0.3
-  startAtCenter: 0
 --- !u!1 &197245707
 GameObject:
   m_ObjectHideFlags: 0
@@ -2303,7 +2523,7 @@ Transform:
   m_GameObject: {fileID: 213814762}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.0069787786, w: 0.9999757}
-  m_LocalPosition: {x: 48.04, y: 67.96, z: 0}
+  m_LocalPosition: {x: 51.240005, y: 68, z: 0}
   m_LocalScale: {x: 2.491429, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2465,7 +2685,7 @@ Transform:
   m_GameObject: {fileID: 218091849}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -7.64, y: -5.6, z: 0}
+  m_LocalPosition: {x: 133.4568, y: 71.840004, z: 0}
   m_LocalScale: {x: 1.8204846, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3134,7 +3354,6 @@ GameObject:
   - component: {fileID: 251309246}
   - component: {fileID: 251309248}
   - component: {fileID: 251309247}
-  - component: {fileID: 251309249}
   m_Layer: 3
   m_Name: TinyRock (15)
   m_TagString: Untagged
@@ -3151,7 +3370,7 @@ Transform:
   m_GameObject: {fileID: 251309245}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 73.24, y: 30.2, z: 0}
+  m_LocalPosition: {x: 73.24, y: 28.12, z: 0}
   m_LocalScale: {x: -1.4569222, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3259,37 +3478,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &251309249
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 251309245}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.28
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &251380770
 GameObject:
   m_ObjectHideFlags: 0
@@ -3719,7 +3907,7 @@ Transform:
   m_GameObject: {fileID: 433113580}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -63.72, y: 36.37, z: 0}
+  m_LocalPosition: {x: -70.549995, y: 38.54, z: 0}
   m_LocalScale: {x: -1.3920207, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3973,7 +4161,6 @@ GameObject:
   - component: {fileID: 491016696}
   - component: {fileID: 491016698}
   - component: {fileID: 491016697}
-  - component: {fileID: 491016699}
   m_Layer: 3
   m_Name: CrackedRock (21)
   m_TagString: Untagged
@@ -4098,37 +4285,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &491016699
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 491016695}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 0.3
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.28
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &505469704
 GameObject:
   m_ObjectHideFlags: 0
@@ -4398,7 +4554,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -285.1, y: -135.16402, z: -10}
+  m_LocalPosition: {x: 64.4, y: -50.66401, z: -10}
   m_LocalScale: {x: 0.6, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4487,7 +4643,6 @@ GameObject:
   - component: {fileID: 526468078}
   - component: {fileID: 526468077}
   - component: {fileID: 526468076}
-  - component: {fileID: 526468079}
   m_Layer: 3
   m_Name: PerfectRockBigSlanting (5)
   m_TagString: Untagged
@@ -4504,7 +4659,7 @@ Transform:
   m_GameObject: {fileID: 526468073}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.0069787786, w: 0.9999757}
-  m_LocalPosition: {x: 157.8, y: 7.6, z: 0}
+  m_LocalPosition: {x: -12.822525, y: 67.8, z: 0}
   m_LocalScale: {x: 1.7045279, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4639,50 +4794,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &526468079
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 526468073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
-  moveType: 1
-  moveSpeed: 2
-  moveDistance: 4
-  circleRadius: 3
-  circleSpeed: 1
-  diagonalAngleDegrees: 45
-  easeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  pauseDuration: 0.3
-  startAtCenter: 0
 --- !u!1 &537918432
 GameObject:
   m_ObjectHideFlags: 0
@@ -5603,7 +5714,7 @@ Transform:
   m_GameObject: {fileID: 639098115}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 89.82, y: 29.93, z: 0}
+  m_LocalPosition: {x: 88.93, y: 29.93, z: 0}
   m_LocalScale: {x: -1.4476635, y: 1.1584189, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5753,7 +5864,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
   moveType: 1
   moveSpeed: 3
-  moveDistance: 7
+  moveDistance: 4
   circleRadius: 3
   circleSpeed: 1
   diagonalAngleDegrees: 45
@@ -6214,13 +6325,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 673839836}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: 0.26324642, w: 0.96472865}
-  m_LocalPosition: {x: -52.100006, y: 61.4, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0.0069787786, w: 0.9999757}
+  m_LocalPosition: {x: 18.622314, y: 70.03, z: 0}
   m_LocalScale: {x: 1.7045279, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1890040160}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 30.526}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0.8}
 --- !u!50 &673839839
 Rigidbody2D:
   serializedVersion: 5
@@ -6619,7 +6730,6 @@ GameObject:
   - component: {fileID: 790639834}
   - component: {fileID: 790639836}
   - component: {fileID: 790639835}
-  - component: {fileID: 790639837}
   m_Layer: 3
   m_Name: TinyRock (12)
   m_TagString: Untagged
@@ -6744,37 +6854,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &790639837
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 790639833}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.1
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &810934029
 GameObject:
   m_ObjectHideFlags: 0
@@ -7073,7 +7152,7 @@ Transform:
   m_GameObject: {fileID: 824124826}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -80.54, y: 40.6, z: 0}
+  m_LocalPosition: {x: -82.53, y: 40.1418, z: 0}
   m_LocalScale: {x: -1.0408013, y: 1.0120349, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7208,6 +7287,141 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &836215432
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 836215433}
+  - component: {fileID: 836215435}
+  - component: {fileID: 836215434}
+  m_Layer: 3
+  m_Name: TinyRock (8)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &836215433
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 836215432}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -13.5, y: 37.42, z: 0}
+  m_LocalScale: {x: 1.490865, y: 1.4710081, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1890040160}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!68 &836215434
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 836215432}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -0.6986349, y: 0.4582367}
+  - {x: 0.7640951, y: 0.4582367}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
+--- !u!212 &836215435
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 836215432}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 6937817954938267909, guid: 9f447b469b4dc964192425381edf6bd6, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1.43, y: 1.49}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
 --- !u!1 &858653371
 GameObject:
   m_ObjectHideFlags: 0
@@ -7220,7 +7434,6 @@ GameObject:
   - component: {fileID: 858653377}
   - component: {fileID: 858653376}
   - component: {fileID: 858653375}
-  - component: {fileID: 858653378}
   m_Layer: 3
   m_Name: SimpleRock (11)
   m_TagString: Untagged
@@ -7237,7 +7450,7 @@ Transform:
   m_GameObject: {fileID: 858653371}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 79.07, y: 29.93, z: 0}
+  m_LocalPosition: {x: 30.130005, y: 66.3919, z: 0}
   m_LocalScale: {x: -1.6862563, y: 1.1584189, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7373,50 +7586,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &858653378
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 858653371}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
-  moveType: 1
-  moveSpeed: 2
-  moveDistance: 3
-  circleRadius: 3
-  circleSpeed: 1
-  diagonalAngleDegrees: 45
-  easeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  pauseDuration: 0.3
-  startAtCenter: 0
 --- !u!1 &876730930
 GameObject:
   m_ObjectHideFlags: 0
@@ -7428,7 +7597,6 @@ GameObject:
   - component: {fileID: 876730931}
   - component: {fileID: 876730933}
   - component: {fileID: 876730932}
-  - component: {fileID: 876730934}
   m_Layer: 3
   m_Name: CrackedRock (1)
   m_TagString: Untagged
@@ -7553,37 +7721,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &876730934
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 876730930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 0.3
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.28
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &880890382
 GameObject:
   m_ObjectHideFlags: 0
@@ -7733,8 +7870,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
   standTime: 2
-  respawnDelay: 3
-  reassembleDuration: 0.6
   maxShakeAmount: 0.18
   shakeFrequency: 28
   pieceCount: 5
@@ -7748,9 +7883,7 @@ MonoBehaviour:
   cameraShakeOffset: -0.4
   cameraShakeDuration: 0.18
   breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
   breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &898924613
 GameObject:
   m_ObjectHideFlags: 0
@@ -7869,7 +8002,7 @@ Transform:
   m_GameObject: {fileID: 907324167}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 119.7, y: 3, z: 0}
+  m_LocalPosition: {x: 68.75, y: 66.56, z: 0}
   m_LocalScale: {x: 1.7208664, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8513,7 +8646,7 @@ Transform:
   m_GameObject: {fileID: 947129888}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -21.84, y: 29.96, z: 0}
+  m_LocalPosition: {x: -28.799988, y: 34.304497, z: 0}
   m_LocalScale: {x: -1.270219, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8648,6 +8781,141 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
+--- !u!1 &954022567
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 954022568}
+  - component: {fileID: 954022570}
+  - component: {fileID: 954022569}
+  m_Layer: 3
+  m_Name: PerfectRockBigSlanting (3)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &954022568
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 954022567}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0.0069787786, w: 0.9999757}
+  m_LocalPosition: {x: -49.289993, y: 64.11, z: 0}
+  m_LocalScale: {x: 1.7045279, y: 1.4710081, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1890040160}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0.8}
+--- !u!68 &954022569
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 954022567}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -3.9979076, y: 1.3283844}
+  - {x: 4.2696133, y: 1.2378082}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
+--- !u!212 &954022570
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 954022567}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 3465286685962602723, guid: eb531d769458ecf45904dc56e0504141, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 8.66, y: 4.54}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
 --- !u!1 &988125342
 GameObject:
   m_ObjectHideFlags: 0
@@ -8750,6 +9018,7 @@ GameObject:
   - component: {fileID: 991138221}
   - component: {fileID: 991138224}
   - component: {fileID: 991138223}
+  - component: {fileID: 991138225}
   m_Layer: 3
   m_Name: MediumRock (8)
   m_TagString: Untagged
@@ -8874,6 +9143,33 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &991138225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 991138220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
+  standTime: 2
+  maxShakeAmount: 0.18
+  shakeFrequency: 28
+  pieceCount: 5
+  pieceSizeFraction: 0.28
+  pieceMinSpeed: 2.5
+  pieceMaxSpeed: 6.5
+  pieceGravity: 6
+  pieceFadeDuration: 0.7
+  pieceUpwardBias: 0.55
+  cameraFollow: {fileID: 0}
+  cameraShakeOffset: -0.4
+  cameraShakeDuration: 0.18
+  breakSound: {fileID: 0}
+  breakVolume: 0.8
 --- !u!1 &1025903254
 GameObject:
   m_ObjectHideFlags: 0
@@ -9116,7 +9412,7 @@ GameObject:
   - component: {fileID: 1056340288}
   m_Layer: 9
   m_Name: Graphics
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9208,7 +9504,6 @@ GameObject:
   - component: {fileID: 1101427435}
   - component: {fileID: 1101427437}
   - component: {fileID: 1101427436}
-  - component: {fileID: 1101427438}
   m_Layer: 3
   m_Name: TinyRock (5)
   m_TagString: Untagged
@@ -9333,37 +9628,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1101427438
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1101427434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.28
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1131307106
 GameObject:
   m_ObjectHideFlags: 0
@@ -9392,7 +9656,7 @@ Transform:
   m_GameObject: {fileID: 1131307106}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.050101176, w: 0.9987442}
-  m_LocalPosition: {x: 185.8, y: 76.1, z: 0}
+  m_LocalPosition: {x: 184.5, y: 75.97, z: 0}
   m_LocalScale: {x: 1.36116, y: 1.0120349, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9538,8 +9802,6 @@ GameObject:
   - component: {fileID: 1132637435}
   - component: {fileID: 1132637437}
   - component: {fileID: 1132637436}
-  - component: {fileID: 1132637439}
-  - component: {fileID: 1132637438}
   m_Layer: 3
   m_Name: PerfectRockBigSlanting (1)
   m_TagString: Untagged
@@ -9556,7 +9818,7 @@ Transform:
   m_GameObject: {fileID: 1132637434}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.10085683, w: -0.99490094}
-  m_LocalPosition: {x: -37.53, y: 33.35, z: 0}
+  m_LocalPosition: {x: -40.5, y: 32.2, z: 0}
   m_LocalScale: {x: 1.7045279, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9664,77 +9926,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1132637438
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1132637434}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
-  moveType: 2
-  moveSpeed: 2
-  moveDistance: 10
-  circleRadius: 3
-  circleSpeed: 1
-  diagonalAngleDegrees: 19.9
-  easeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  pauseDuration: 0.3
-  startAtCenter: 0
---- !u!50 &1132637439
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1132637434}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!1 &1143491691
 GameObject:
   m_ObjectHideFlags: 0
@@ -9768,7 +9959,7 @@ Transform:
   m_GameObject: {fileID: 1143491691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -285.1, y: -141.5, z: 0}
+  m_LocalPosition: {x: 64.4, y: -57, z: 0}
   m_LocalScale: {x: 1.1137476, y: 1.1836817, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -15008,6 +15199,141 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &1208290191
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1208290192}
+  - component: {fileID: 1208290194}
+  - component: {fileID: 1208290193}
+  m_Layer: 3
+  m_Name: TinyRock (16)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1208290192
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208290191}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 79.03, y: 67.96, z: 0}
+  m_LocalScale: {x: -1.4569222, y: 1.4710081, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1890040160}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!68 &1208290193
+EdgeCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208290191}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0, y: 0}
+  m_EdgeRadius: 0
+  m_Points:
+  - {x: -0.6986349, y: 0.4582367}
+  - {x: 0.7640951, y: 0.4582367}
+  m_AdjacentStartPoint: {x: 0, y: 0}
+  m_AdjacentEndPoint: {x: 0, y: 0}
+  m_UseAdjacentStartPoint: 0
+  m_UseAdjacentEndPoint: 0
+--- !u!212 &1208290194
+SpriteRenderer:
+  serializedVersion: 2
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1208290191}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 6937817954938267909, guid: 9f447b469b4dc964192425381edf6bd6, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 1
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 1.43, y: 1.49}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
 --- !u!1 &1209882643
 GameObject:
   m_ObjectHideFlags: 0
@@ -15034,13 +15360,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1209882643}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.0022785615, w: -0.99999744}
-  m_LocalPosition: {x: 237.07, y: -7.75, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: 0.041740935, w: 0.9991285}
+  m_LocalPosition: {x: 237.16997, y: -8.900002, z: 0}
   m_LocalScale: {x: 2.5878766, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1890040160}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -0.261}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 4.785}
 --- !u!68 &1209882645
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -15472,7 +15798,7 @@ Transform:
   m_GameObject: {fileID: 1251479878}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 97.8, y: 4.6, z: 0}
+  m_LocalPosition: {x: 104, y: -3.22, z: 0}
   m_LocalScale: {x: 1.1147063, y: 0.797281, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15755,9 +16081,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 0.5
-  respawnDelay: 3
-  reassembleDuration: 0.6
+  standTime: 2
   maxShakeAmount: 0.18
   shakeFrequency: 28
   pieceCount: 5
@@ -15771,9 +16095,7 @@ MonoBehaviour:
   cameraShakeOffset: -0.4
   cameraShakeDuration: 0.18
   breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
   breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1265923973
 GameObject:
   m_ObjectHideFlags: 0
@@ -15854,7 +16176,7 @@ Transform:
   m_GameObject: {fileID: 1273822331}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.07015257, w: 0.9975363}
-  m_LocalPosition: {x: -12.44, y: 29.69, z: 0}
+  m_LocalPosition: {x: -22.919994, y: 31.83, z: 0}
   m_LocalScale: {x: 1.3432394, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16211,7 +16533,7 @@ Transform:
   m_GameObject: {fileID: 1290960523}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -285.1, y: -135.16402, z: -10}
+  m_LocalPosition: {x: 64.4, y: -50.66401, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -21714,7 +22036,7 @@ Transform:
   m_GameObject: {fileID: 1382117459}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 165.02, y: 73.83, z: 0}
+  m_LocalPosition: {x: 161.8, y: 73.65, z: 0}
   m_LocalScale: {x: 1.7208664, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -22312,7 +22634,6 @@ GameObject:
   - component: {fileID: 1416084003}
   - component: {fileID: 1416084005}
   - component: {fileID: 1416084004}
-  - component: {fileID: 1416084006}
   m_Layer: 3
   m_Name: TinyRock (17)
   m_TagString: Untagged
@@ -22329,7 +22650,7 @@ Transform:
   m_GameObject: {fileID: 1416084002}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -73.65, y: 39.15, z: 0}
+  m_LocalPosition: {x: -76.99, y: 40.25, z: 0}
   m_LocalScale: {x: -1.3920207, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -22437,37 +22758,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1416084006
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1416084002}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.1
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1447485169
 GameObject:
   m_ObjectHideFlags: 0
@@ -22479,7 +22769,6 @@ GameObject:
   - component: {fileID: 1447485170}
   - component: {fileID: 1447485172}
   - component: {fileID: 1447485171}
-  - component: {fileID: 1447485173}
   m_Layer: 3
   m_Name: TinyRock (19)
   m_TagString: Untagged
@@ -22496,7 +22785,7 @@ Transform:
   m_GameObject: {fileID: 1447485169}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 139.7, y: 78.1, z: 0}
+  m_LocalPosition: {x: 141.879, y: 73.55001, z: 0}
   m_LocalScale: {x: 1.8204846, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -22604,37 +22893,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1447485173
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1447485169}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.1
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1461571367
 GameObject:
   m_ObjectHideFlags: 0
@@ -22929,7 +23187,7 @@ Transform:
   m_GameObject: {fileID: 1484531141}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 170.1, y: 31.9, z: 0}
+  m_LocalPosition: {x: 166.4, y: 31.9, z: 0}
   m_LocalScale: {x: 1.7208664, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -23321,7 +23579,6 @@ GameObject:
   - component: {fileID: 1521282271}
   - component: {fileID: 1521282270}
   - component: {fileID: 1521282269}
-  - component: {fileID: 1521282272}
   m_Layer: 3
   m_Name: SimpleRock (10)
   m_TagString: Untagged
@@ -23338,7 +23595,7 @@ Transform:
   m_GameObject: {fileID: 1521282265}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 23.3, y: 68.7, z: 0}
+  m_LocalPosition: {x: 14.040009, y: 65.3419, z: 0}
   m_LocalScale: {x: -1.4476635, y: 1.1584189, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -23474,50 +23731,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1521282272
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1521282265}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
-  moveType: 0
-  moveSpeed: 6
-  moveDistance: 15
-  circleRadius: 3
-  circleSpeed: 1
-  diagonalAngleDegrees: 45
-  easeCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  pauseDuration: 0.3
-  startAtCenter: 0
 --- !u!1 &1526233054
 GameObject:
   m_ObjectHideFlags: 0
@@ -23681,7 +23894,7 @@ Transform:
   m_GameObject: {fileID: 1527647132}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.0065475567, w: 0.9999786}
-  m_LocalPosition: {x: 237.3, y: 77.9, z: 0}
+  m_LocalPosition: {x: 175.51001, y: 74.89, z: 0}
   m_LocalScale: {x: 1.36116, y: 1.0120349, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -23962,7 +24175,6 @@ GameObject:
   - component: {fileID: 1566633236}
   - component: {fileID: 1566633238}
   - component: {fileID: 1566633237}
-  - component: {fileID: 1566633239}
   m_Layer: 3
   m_Name: TinyRock (18)
   m_TagString: Untagged
@@ -23979,7 +24191,7 @@ Transform:
   m_GameObject: {fileID: 1566633235}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -69.57, y: 38.06, z: 0}
+  m_LocalPosition: {x: -74.579994, y: 39.52, z: 0}
   m_LocalScale: {x: -1.3920207, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -24087,37 +24299,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1566633239
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1566633235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.1
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1591941784
 GameObject:
   m_ObjectHideFlags: 0
@@ -24580,7 +24761,7 @@ Transform:
   m_GameObject: {fileID: 1618743291}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.7, y: 65.9, z: 0}
+  m_LocalPosition: {x: 2.3200073, y: 68.9, z: 0}
   m_LocalScale: {x: 1.7208664, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -24699,7 +24880,6 @@ GameObject:
   - component: {fileID: 1621295875}
   - component: {fileID: 1621295877}
   - component: {fileID: 1621295876}
-  - component: {fileID: 1621295878}
   m_Layer: 3
   m_Name: TinyRock (20)
   m_TagString: Untagged
@@ -24716,7 +24896,7 @@ Transform:
   m_GameObject: {fileID: 1621295874}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 135.2, y: 77.3, z: 0}
+  m_LocalPosition: {x: 138.7272, y: 72.82, z: 0}
   m_LocalScale: {x: 1.8204846, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -24824,37 +25004,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1621295878
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1621295874}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.1
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1638421388
 GameObject:
   m_ObjectHideFlags: 0
@@ -25001,7 +25150,6 @@ GameObject:
   - component: {fileID: 1649458867}
   - component: {fileID: 1649458869}
   - component: {fileID: 1649458868}
-  - component: {fileID: 1649458870}
   m_Layer: 3
   m_Name: TinyRock (6)
   m_TagString: Untagged
@@ -25126,37 +25274,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1649458870
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1649458866}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 1
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.1
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1719402786
 GameObject:
   m_ObjectHideFlags: 0
@@ -26024,9 +26141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 0.5
-  respawnDelay: 3
-  reassembleDuration: 0.6
+  standTime: 2
   maxShakeAmount: 0.18
   shakeFrequency: 28
   pieceCount: 5
@@ -26040,9 +26155,7 @@ MonoBehaviour:
   cameraShakeOffset: -0.4
   cameraShakeDuration: 0.18
   breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
   breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1795618947
 GameObject:
   m_ObjectHideFlags: 0
@@ -26354,7 +26467,7 @@ Transform:
   m_GameObject: {fileID: 1812175582}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 148.25, y: 78, z: 0}
+  m_LocalPosition: {x: 147.87001, y: 73.44181, z: 0}
   m_LocalScale: {x: 1.36116, y: 1.0120349, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26516,7 +26629,7 @@ Transform:
   m_GameObject: {fileID: 1814964081}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 106.1, y: 71.9, z: 0}
+  m_LocalPosition: {x: 112.43001, y: 68.8, z: 0}
   m_LocalScale: {x: 1.8204846, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26921,7 +27034,6 @@ GameObject:
   - component: {fileID: 1869591917}
   - component: {fileID: 1869591919}
   - component: {fileID: 1869591918}
-  - component: {fileID: 1869591920}
   m_Layer: 3
   m_Name: CrackedRock (19)
   m_TagString: Untagged
@@ -27046,37 +27158,6 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!114 &1869591920
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1869591916}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 0.3
-  respawnDelay: 3
-  reassembleDuration: 0.6
-  maxShakeAmount: 0.18
-  shakeFrequency: 28
-  pieceCount: 5
-  pieceSizeFraction: 0.28
-  pieceMinSpeed: 2.5
-  pieceMaxSpeed: 6.5
-  pieceGravity: 6
-  pieceFadeDuration: 0.7
-  pieceUpwardBias: 0.55
-  cameraFollow: {fileID: 0}
-  cameraShakeOffset: -0.4
-  cameraShakeDuration: 0.18
-  breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
-  breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1 &1870875700
 GameObject:
   m_ObjectHideFlags: 0
@@ -27240,7 +27321,7 @@ Transform:
   m_GameObject: {fileID: 1874182906}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 225.4, y: 77.5, z: 0}
+  m_LocalPosition: {x: 226.9, y: 77.5, z: 0}
   m_LocalScale: {x: 1.5378785, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -27561,6 +27642,7 @@ Transform:
   - {fileID: 1132637435}
   - {fileID: 1958508496}
   - {fileID: 1863225991}
+  - {fileID: 954022568}
   - {fileID: 673839837}
   - {fileID: 526468074}
   - {fileID: 213814763}
@@ -27604,6 +27686,7 @@ Transform:
   - {fileID: 1149431347}
   - {fileID: 1323838721}
   - {fileID: 1414414993}
+  - {fileID: 836215433}
   - {fileID: 1416084003}
   - {fileID: 1447485170}
   - {fileID: 1566633236}
@@ -27611,6 +27694,8 @@ Transform:
   - {fileID: 2070742357}
   - {fileID: 790639834}
   - {fileID: 72697884}
+  - {fileID: 1208290192}
+  - {fileID: 51118032}
   - {fileID: 251309246}
   - {fileID: 151841342}
   - {fileID: 1259167961}
@@ -27909,7 +27994,7 @@ Transform:
   m_GameObject: {fileID: 1958508495}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0.055796415, w: 0.9984422}
-  m_LocalPosition: {x: 122.8, y: 73.6, z: 0}
+  m_LocalPosition: {x: 123.2428, y: 70.00001, z: 0}
   m_LocalScale: {x: -2.2291818, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -28046,7 +28131,7 @@ Transform:
   m_GameObject: {fileID: 1960851573}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 193.4, y: 32.8, z: 0}
+  m_LocalPosition: {x: 190.3, y: 32.8, z: 0}
   m_LocalScale: {x: 1.3604143, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -28252,7 +28337,7 @@ Transform:
   m_GameObject: {fileID: 1961802659}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -69.6, y: 57.2, z: 0}
+  m_LocalPosition: {x: -75.229996, y: 62.5, z: 0}
   m_LocalScale: {x: 1.7208664, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -28387,7 +28472,7 @@ Transform:
   m_GameObject: {fileID: 1998448454}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 80.95, y: 70.06, z: 0}
+  m_LocalPosition: {x: 95.36661, y: 67.66, z: 0}
   m_LocalScale: {x: 2.3034859, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -28970,9 +29055,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fae1984f208c4d4f98d7dde301d8f9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BreakableRock
-  standTime: 0.5
-  respawnDelay: 3
-  reassembleDuration: 0.6
+  standTime: 0.1
   maxShakeAmount: 0.18
   shakeFrequency: 28
   pieceCount: 5
@@ -28986,9 +29069,7 @@ MonoBehaviour:
   cameraShakeOffset: -0.4
   cameraShakeDuration: 0.18
   breakSound: {fileID: 0}
-  reassembleSound: {fileID: 0}
   breakVolume: 0.8
-  reassembleVolume: 0.7
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

@@ -109,6 +109,7 @@ public class PlayerMovement : MonoBehaviour
 
     // ── Public accessors ──
     public bool IsGrounded => isGrounded;
+    public Collider2D GroundCollider => currentGroundCollider;
     public bool IsBlocking => isBlocking;
     public bool IsVerticalAttacking => isVerticalAttacking;
 
@@ -447,22 +448,18 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private Vector2 GetGroundVelocity(Collider2D hitCollider, Rigidbody2D hitRb)
-    {
-        if (hitCollider == null) return Vector2.zero;
+private Vector2 GetGroundVelocity(Collider2D hitCollider, Rigidbody2D hitRb)
+{
+    if (hitCollider == null) return Vector2.zero;
 
-        MovingRockUpDown movingRock = hitCollider.GetComponent<MovingRockUpDown>();
-        if (movingRock == null) movingRock = hitCollider.GetComponentInParent<MovingRockUpDown>();
-        if (movingRock != null) return movingRock.Velocity;
+    MovingPlatform movingPlatform = hitCollider.GetComponent<MovingPlatform>();
+    if (movingPlatform == null) movingPlatform = hitCollider.GetComponentInParent<MovingPlatform>();
+    if (movingPlatform != null) return movingPlatform.Velocity;
 
-        MovingPlatform movingPlatform = hitCollider.GetComponent<MovingPlatform>();
-        if (movingPlatform == null) movingPlatform = hitCollider.GetComponentInParent<MovingPlatform>();
-        if (movingPlatform != null) return movingPlatform.Velocity;
+    if (hitRb != null) return hitRb.linearVelocity;
 
-        if (hitRb != null) return hitRb.linearVelocity;
-
-        return Vector2.zero;
-    }
+    return Vector2.zero;
+}
 
     // ═══════════════════════════════════════════
     //  MOVEMENT
