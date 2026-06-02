@@ -25,14 +25,13 @@ public class ShadowFollow : MonoBehaviour
     [SerializeField] private float impactRecoverSpeed = 8f;
 
     [Header("Moving Platform Smoothing")]
-    [SerializeField] private float positionSmoothSpeed = 25f; // Higher = less lag
+    [SerializeField] private float positionSmoothSpeed = 25f;
 
     private Vector3 baseScale;
     private float currentAlpha;
     private bool wasGrounded;
     private float impactMultiplier = 1f;
 
-    // Smoothed shadow position to prevent flicker on moving platforms
     private Vector3 smoothedShadowPos;
     private bool shadowInitialized = false;
 
@@ -43,7 +42,6 @@ public class ShadowFollow : MonoBehaviour
         if (sr == null) sr = GetComponent<SpriteRenderer>();
     }
 
-    // Use LateUpdate so shadow updates AFTER physics and player movement
     void LateUpdate()
     {
         Vector2 origin = new Vector2(player.position.x, player.position.y + rayHeight);
@@ -66,14 +64,12 @@ public class ShadowFollow : MonoBehaviour
                 float dynamicOffset = Mathf.Abs(rb.linearVelocity.x) > 0.1f ? dir * directionOffset : 0f;
                 float behindOffset = -dir * shadowOffsetAmount;
 
-                // Target position from raycast
                 Vector3 targetPos = new Vector3(
                     player.position.x + dynamicOffset + behindOffset,
                     centerHit.point.y + 0.02f,
                     0f
                 );
 
-                // Smooth the position to eliminate flicker on moving platforms
                 if (!shadowInitialized)
                 {
                     smoothedShadowPos = targetPos;
@@ -89,7 +85,6 @@ public class ShadowFollow : MonoBehaviour
                 transform.position = smoothedShadowPos;
                 transform.rotation = Quaternion.identity;
 
-                // Scale
                 float t = Mathf.Clamp01(distance / maxDistance);
                 float scaleFactor = Mathf.Lerp(1f, 1f - shrinkAmount, t);
                 float speed = Mathf.Abs(rb.linearVelocity.x);
@@ -99,7 +94,6 @@ public class ShadowFollow : MonoBehaviour
                 float finalScaleY = baseScale.y * scaleFactor * impactMultiplier;
                 transform.localScale = new Vector3(finalScaleX, finalScaleY, 1f);
 
-                // Edge support
                 float halfWidth = baseScale.x * 0.5f;
                 RaycastHit2D leftHit = Physics2D.Raycast(new Vector2(player.position.x - halfWidth, player.position.y + rayHeight), Vector2.down, rayHeight * 2f, groundLayer);
                 RaycastHit2D rightHit = Physics2D.Raycast(new Vector2(player.position.x + halfWidth, player.position.y + rayHeight), Vector2.down, rayHeight * 2f, groundLayer);
