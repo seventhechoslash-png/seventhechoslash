@@ -112,6 +112,7 @@ public class PlayerMovement : MonoBehaviour
     public Collider2D GroundCollider => currentGroundCollider;
     public bool IsBlocking => isBlocking;
     public bool IsVerticalAttacking => isVerticalAttacking;
+    public bool IsDashing => isDashing;
 
     private void Awake()
     {

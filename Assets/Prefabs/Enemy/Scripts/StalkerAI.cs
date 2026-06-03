@@ -75,7 +75,6 @@ public class StalkerAI : MonoBehaviour
         float time = Time.time + randomOffset;
         float waveY = Mathf.Sin(time * floatFrequency) * floatHeight * Time.deltaTime;
 
-        // Check BEFORE moving to prevent overshoot flip-lock
         float nextX = transform.position.x + moveX;
         if (Mathf.Abs(nextX - startPos.x) >= floatDistance)
         {
@@ -91,7 +90,7 @@ public class StalkerAI : MonoBehaviour
     {
         isFiring = true;
 
-        // Phase 1 - Charge: lasers flicker toward player
+        // Phase 1 - Charge
         foreach (var l in lasers)
             if (l != null) l.StartCharging();
 
@@ -107,7 +106,7 @@ public class StalkerAI : MonoBehaviour
             yield return null;
         }
 
-        // Phase 2 - Tracking: full glowing laser tracks player
+        // Phase 2 - Tracking
         foreach (var l in lasers)
             if (l != null) l.StartFiring();
 
@@ -119,19 +118,30 @@ public class StalkerAI : MonoBehaviour
             yield return null;
         }
 
-        // Phase 3 - Fire: lock on, deal damage, spawn hit effect
+        // Phase 3 - Fire: check guard BEFORE applying damage
         Vector3 finalTarget = GetTargetPosition();
         UpdateLasers(finalTarget);
 
-        PlayerHealth ph = player.GetComponent<PlayerHealth>();
-        if (ph != null)
-        {
-            Vector2 hitDir = (player.position - transform.position).normalized;
-            ph.TakeDamage(damage, hitDir);
-        }
+        // Check if player is guarding
+        PlayerGuard guard = player.GetComponent<PlayerGuard>();
+        bool blocked = guard != null && guard.TryBlockDamage(finalTarget);
 
-        if (hitEffectPrefab != null)
-            Instantiate(hitEffectPrefab, finalTarget, Quaternion.identity);
+        if (!blocked)
+        {
+            // Not guarding — deal damage normally
+            PlayerHealth ph = player.GetComponent<PlayerHealth>();
+            if (ph != null)
+            {
+                Vector2 hitDir = (player.position - transform.position).normalized;
+                ph.TakeDamage(damage, hitDir);
+            }
+
+            // Spawn hit effect on the player
+            if (hitEffectPrefab != null)
+                Instantiate(hitEffectPrefab, finalTarget, Quaternion.identity);
+        }
+        // If blocked: LaserBlockEffect plays automatically inside TryBlockDamage
+        // No hit effect, no damage
 
         yield return new WaitForSeconds(laserDuration);
 
