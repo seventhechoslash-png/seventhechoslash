@@ -2,8 +2,8 @@ using UnityEngine;
 
 /// <summary>
 /// Attach to Player root.
-/// Reads IsBlocking directly from PlayerMovement — no duplicate input handling.
-/// Also sets isCrouchGuard on the Animator automatically.
+/// Reads IsBlocking and IsCrouchBlocking directly from PlayerMovement.
+/// No duplicate input handling needed.
 /// </summary>
 public class PlayerGuard : MonoBehaviour
 {
@@ -14,7 +14,8 @@ public class PlayerGuard : MonoBehaviour
     private Animator animator;
 
     // Public so StalkerAI can check it
-    public bool IsGuarding => playerMovement != null && playerMovement.IsBlocking;
+    public bool IsGuarding => playerMovement != null && 
+        (playerMovement.IsBlocking || playerMovement.IsCrouchBlocking);
 
     void Awake()
     {
@@ -30,12 +31,8 @@ public class PlayerGuard : MonoBehaviour
     {
         if (animator == null || playerMovement == null) return;
 
-        // isCrouching is already set by PlayerMovement — just read it
-        bool isCrouching = animator.GetBool("isCrouching");
-        bool isBlocking  = playerMovement.IsBlocking;
-
-        // CrouchGuard = blocking while crouching
-        SetBoolIfExists("isCrouchGuard", isBlocking && isCrouching);
+        // isCrouchGuard is now set directly by PlayerMovement in UpdateAnimator
+        // Nothing extra needed here
     }
 
     /// <summary>
@@ -50,19 +47,5 @@ public class PlayerGuard : MonoBehaviour
             blockEffect.PlayBlockEffect(hitPoint);
 
         return true;
-    }
-
-    private void SetBoolIfExists(string param, bool value)
-    {
-        if (animator == null) return;
-        for (int i = 0; i < animator.parameterCount; i++)
-        {
-            var p = animator.GetParameter(i);
-            if (p.name == param && p.type == AnimatorControllerParameterType.Bool)
-            {
-                animator.SetBool(param, value);
-                return;
-            }
-        }
     }
 }

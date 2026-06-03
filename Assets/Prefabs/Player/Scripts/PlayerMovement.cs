@@ -87,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isVerticalAttacking;
     private bool isVerticalAttackHolding;
     private bool isBlocking;
+    private bool isCrouchBlocking;
     private float lastGroundedTime;
 
     // ── Ground tracking ──
@@ -111,6 +112,7 @@ public class PlayerMovement : MonoBehaviour
     public bool IsGrounded => isGrounded;
     public Collider2D GroundCollider => currentGroundCollider;
     public bool IsBlocking => isBlocking;
+    public bool IsCrouchBlocking => isCrouchBlocking;
     public bool IsVerticalAttacking => isVerticalAttacking;
     public bool IsDashing => isDashing;
 
@@ -237,7 +239,11 @@ public class PlayerMovement : MonoBehaviour
             isVerticalAttacking = false;
         }
 
-        isBlocking = blockHeld && isGrounded && !isAttacking && !isDashing;
+        // Standing block: G held, NOT crouching
+        isBlocking = blockHeld && isGrounded && !isAttacking && !isDashing && !crouchHeld;
+
+        // Crouch block: G held AND C held while grounded
+        isCrouchBlocking = blockHeld && crouchHeld && isGrounded && !isAttacking && !isDashing;
 
         if (dashCooldownRemaining > 0f)
             dashCooldownRemaining = Mathf.Max(0f, dashCooldownRemaining - Time.fixedDeltaTime);
@@ -282,7 +288,7 @@ public class PlayerMovement : MonoBehaviour
     private void HandleDash()
     {
         if (!isDashing) return;
-	rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         if (isAttacking)
         {
@@ -404,7 +410,8 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isDashing) return;
 
-        if (lockMovementDuringBlock && isBlocking)
+        // Lock movement during both standing block and crouch block
+        if (lockMovementDuringBlock && (isBlocking || isCrouchBlocking))
         {
             rb.linearVelocity = new Vector2(currentGroundVelocity.x, rb.linearVelocity.y);
             return;
@@ -419,7 +426,8 @@ public class PlayerMovement : MonoBehaviour
         float rawX = moveInput.x;
         if (Mathf.Abs(rawX) < inputDeadzone) rawX = 0f;
 
-        float targetX = (crouchHeld && isGrounded) ? 0f : rawX * moveSpeed;
+        // Keep crouched during crouch block too
+        float targetX = ((crouchHeld || isCrouchBlocking) && isGrounded) ? 0f : rawX * moveSpeed;
 
         if (isGrounded)
         {
@@ -430,7 +438,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 rb.linearVelocity = new Vector2(currentGroundVelocity.x, currentGroundVelocity.y);
 
-                // Only freeze Y on static ground — moving platforms need Y free
                 bool onMovingPlatform = currentGroundCollider != null &&
                                         currentGroundCollider.GetComponentInParent<MovingPlatform>() != null;
 
@@ -465,7 +472,7 @@ public class PlayerMovement : MonoBehaviour
     private void HandleJump()
     {
         if (!jumpPressed) return;
-        if (isBlocking) return;
+        if (isBlocking || isCrouchBlocking) return;
 
         if (isDashing)
         {
@@ -507,7 +514,7 @@ public class PlayerMovement : MonoBehaviour
     private void HandleAttack()
     {
         if (animator == null) return;
-        if (isBlocking) return;
+        if (isBlocking || isCrouchBlocking) return;
 
         if (isVerticalAttacking)
         {
@@ -555,14 +562,16 @@ public class PlayerMovement : MonoBehaviour
         AnimatorStateInfo st = animator.GetCurrentAnimatorStateInfo(0);
         if (st.IsName("Death")) return;
 
-        bool isCrouching = crouchHeld && isGrounded;
-        bool allowRun    = !(lockMovementDuringAttack && isAttacking) && !isBlocking;
+        // Stay crouched during crouch block
+        bool isCrouching = (crouchHeld || isCrouchBlocking) && isGrounded;
+        bool allowRun    = !(lockMovementDuringAttack && isAttacking) && !isBlocking && !isCrouchBlocking;
         bool isRunning   = allowRun && Mathf.Abs(moveInput.x) > 0.1f && isGrounded && !isCrouching;
 
         SetAnimatorBoolIfExists("isGrounded",          isGrounded);
         SetAnimatorBoolIfExists("isCrouching",         isCrouching);
         SetAnimatorBoolIfExists("isRunning",           isRunning);
         SetAnimatorBoolIfExists("isBlocking",          isBlocking);
+        SetAnimatorBoolIfExists("isCrouchGuard",       isCrouchBlocking);
         SetAnimatorBoolIfExists("isVerticalAttacking", isVerticalAttacking);
         SetAnimatorBoolIfExists("isDashing",           isDashing);
         SetAnimatorBoolIfExists(didJumpBool,           didJump);
@@ -607,7 +616,7 @@ public class PlayerMovement : MonoBehaviour
     private void OnAttack(InputAction.CallbackContext ctx)
     {
         attackPressed = true;
-        if (animator != null && !isAttacking && !isBlocking)
+        if (animator != null && !isAttacking && !isBlocking && !isCrouchBlocking)
         {
             animator.ResetTrigger(attackTrigger);
             animator.SetTrigger(attackTrigger);

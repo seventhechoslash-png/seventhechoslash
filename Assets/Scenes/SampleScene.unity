@@ -636,16 +636,18 @@ MonoBehaviour:
     m_Bits: 8
   sr: {fileID: 38379726}
   rayHeight: 5
-  maxDistance: 5
-  shrinkAmount: 0.85
-  runStretch: 1.71
-  visibleAlpha: 0.5
-  fadeSpeed: 12.1
+  maxDistance: 2
+  shrinkAmount: 0.15
+  runStretch: 1.15
+  visibleAlpha: 0.65
+  fadeSpeed: 10
   directionOffset: 0.15
   shadowOffsetAmount: 0.15
   impactScaleBoost: 1.25
   impactRecoverSpeed: 8
   positionSmoothSpeed: 25
+  poseScaleY: 0.13
+  playerGraphics: {fileID: 1056340287}
 --- !u!1 &40473994
 GameObject:
   m_ObjectHideFlags: 0
@@ -4398,7 +4400,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -301.8, y: -109.10401, z: -10}
+  m_LocalPosition: {x: -235.7, y: -111.06401, z: -10}
   m_LocalScale: {x: 0.6, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5975,7 +5977,7 @@ Transform:
   m_GameObject: {fileID: 665721943}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -233.07, y: -62.2, z: 0}
+  m_LocalPosition: {x: -249.78938, y: -98.94779, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5995,12 +5997,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProwlerAI
   walkSpeed: 2.5
+  patrolDistance: 6
   chaseSpeed: 9
-  detectionRange: 17.5
-  attackRange: 3.23
-  attackCooldown: 0
-  leapSpeed: 5
-  leapDuration: 0
+  detectionRange: 10
+  attackRange: 7
+  attackCooldown: 0.5
+  leapSpeed: 14
+  leapDuration: 0.3
+  idleDuration: 1
   damage: 0
   player: {fileID: 1143491695}
   graphics: {fileID: 667807421}
@@ -6008,7 +6012,6 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  showGizmos: 1
 --- !u!50 &665721947
 Rigidbody2D:
   serializedVersion: 5
@@ -6070,8 +6073,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 3.9297838, y: -16.453424}
-  m_Size: {x: 3.7520137, y: 2.6008456}
+  m_Offset: {x: -0.7176436, y: -16.058199}
+  m_Size: {x: 7.4803224, y: 3.3912969}
   m_Direction: 1
 --- !u!1 &667807420
 GameObject:
@@ -6100,8 +6103,8 @@ Transform:
   m_GameObject: {fileID: 667807420}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.19, y: -16.95, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
+  m_LocalPosition: {x: 0, y: -16.95, z: 0}
+  m_LocalScale: {x: -1.5, y: 1.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 665721944}
@@ -9768,7 +9771,7 @@ Transform:
   m_GameObject: {fileID: 1143491691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -301.8, y: -115.44, z: 0}
+  m_LocalPosition: {x: -235.7, y: -117.4, z: 0}
   m_LocalScale: {x: 1.1137476, y: 1.1836817, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -9961,8 +9964,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2ec5f26833c7b9e45b5df66139e92f5f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DashAfterimage
-  spawnInterval: 0.04
-  fadeDuration: 0.18
+  spawnInterval: 0.21
+  fadeDuration: 0.94
   startAlpha: 0.75
   sortingOrder: -1
 --- !u!1 &1149431346
@@ -11249,7 +11252,7 @@ Transform:
   m_GameObject: {fileID: 1281255618}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -252.16, y: -78.78, z: 0}
+  m_LocalPosition: {x: -127.3, y: -76.6, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11331,7 +11334,7 @@ Transform:
   m_GameObject: {fileID: 1282942571}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.08, y: 3.1, z: 0}
+  m_LocalPosition: {x: 0.37, y: 3.76, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -11438,7 +11441,7 @@ Transform:
   m_GameObject: {fileID: 1290960523}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -301.8, y: -109.10401, z: -10}
+  m_LocalPosition: {x: -235.7, y: -111.06401, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -22991,16 +22994,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LaserBlockEffect
   sparkColor: {r: 1, g: 0.95, b: 0.7, a: 1}
-  sparkCoreColor: {r: 1, g: 1, b: 1, a: 1}
-  sparkCount: 28
-  sparkLifetime: 0.18
-  sparkSpeed: 7
-  flashColor: {r: 0.9, g: 0.95, b: 1, a: 0.85}
-  flashDuration: 0.22
-  flashMaxScale: 1.6
-  mainCamera: {fileID: 0}
-  screenFlashIntensity: 0.35
-  screenFlashDuration: 0.12
+  sparkCount: 20
+  sparkLifetime: 0.399
+  sparkSpeed: 9.18
+  sparkSize: 0.454
+  flashColor: {r: 0.8943718, g: 1, b: 0, a: 0.85}
+  flashDuration: 0.357
+  flashMaxScale: 2.75
+  screenFlashIntensity: 0.261
+  screenFlashDuration: 0.102
   blockSoundClip: {fileID: 0}
   blockSoundVolume: 0.8
 --- !u!1 &1938484094
