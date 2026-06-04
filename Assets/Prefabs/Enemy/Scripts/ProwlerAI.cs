@@ -1,52 +1,42 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-/// <summary>
-/// Prowler Beast AI — patrol, chase, leap attack, idle, repeat.
-/// ALL position logic uses transform.position (root).
-/// Graphics child is only used for sprite flipping.
-/// </summary>
 public class ProwlerAI : MonoBehaviour
 {
     [Header("Patrol")]
     public float walkSpeed = 2.5f;
-    public float patrolDistance = 6f;   // how far it walks before turning
+    public float patrolDistance = 6f;
 
     [Header("Chase")]
     public float chaseSpeed = 5f;
     public float detectionRange = 10f;
 
     [Header("Attack")]
-    public float attackRange = 3f;      // horizontal distance to trigger leap
+    public float attackRange = 7f;
     public float attackCooldown = 2f;
     public float leapSpeed = 14f;
     public float leapDuration = 0.3f;
-    public float idleDuration = 1f;     // sit idle after attack before chasing again
+    public float idleDuration = 1f;
     public int damage = 15;
 
     [Header("References")]
     public Transform player;
-    public Transform graphics;          // child with SpriteRenderer — for flipping only
+    public Transform graphics;
     public Animator animator;
 
     [Header("Ground")]
     public LayerMask groundLayer;
 
-    // ── Private ───────────────────────────────────────────────────────────
     private Rigidbody2D rb;
     private bool isDead = false;
     private float lastAttackTime = -99f;
-
-    // Patrol
     private Vector3 patrolOrigin;
     private float patrolDir = 1f;
-
-    // State
-    private enum State { Patrol, Chase, Attack, Idle }
-    private State state = State.Patrol;
     private bool attackRunning = false;
 
-    // ── Init ──────────────────────────────────────────────────────────────
+    private enum State { Patrol, Chase, Attack, Idle }
+    private State state = State.Patrol;
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -71,13 +61,11 @@ public class ProwlerAI : MonoBehaviour
         }
     }
 
-    // ── Update — state decisions ──────────────────────────────────────────
     void Update()
     {
         if (isDead || player == null) return;
-        if (attackRunning) return; // attack coroutine owns everything during attack
+        if (attackRunning) return;
 
-        // Horizontal distance only — avoids Y offset issues completely
         float distX = Mathf.Abs(transform.position.x - player.position.x);
 
         if (distX <= attackRange && Time.time >= lastAttackTime + attackCooldown)
@@ -87,7 +75,6 @@ public class ProwlerAI : MonoBehaviour
         }
         else if (distX <= attackRange)
         {
-            // In range but on cooldown — stand still facing player
             state = State.Idle;
             FaceTarget(player.position.x);
         }
@@ -100,59 +87,56 @@ public class ProwlerAI : MonoBehaviour
             state = State.Patrol;
         }
 
-        // Animator
         if (animator != null)
             animator.SetBool("isWalking", state == State.Patrol || state == State.Chase);
     }
 
-    // ── FixedUpdate — movement ────────────────────────────────────────────
     void FixedUpdate()
     {
-        if (isDead || attackRunning) return;
+        if (isDead) return;
 
         switch (state)
         {
-            case State.Patrol: DoPatrol(); break;
-            case State.Chase:  DoChase();  break;
+            case State.Patrol:
+                // Unlock X for movement
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+                DoPatrol();
+                break;
+
+            case State.Chase:
+                // Unlock X for movement
+                rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+                DoChase();
+                break;
+
             case State.Idle:
+                // FREEZE X — player cannot push the Prowler while it's idle/waiting
+                rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
                 rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+                break;
+
+            case State.Attack:
+                if (!attackRunning)
+                {
+                    // Freeze if attack coroutine hasn't started yet
+                    rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
+                    rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+                }
                 break;
         }
     }
 
-    // ── Patrol ────────────────────────────────────────────────────────────
-    void DoPatrol()
-    {
-        float distFromOrigin = transform.position.x - patrolOrigin.x;
-
-        // Turn around at patrol boundaries
-        if (distFromOrigin >= patrolDistance)  patrolDir = -1f;
-        if (distFromOrigin <= -patrolDistance) patrolDir =  1f;
-
-        rb.linearVelocity = new Vector2(patrolDir * walkSpeed, rb.linearVelocity.y);
-        FaceTarget(transform.position.x + patrolDir);
-    }
-
-    // ── Chase ─────────────────────────────────────────────────────────────
-    void DoChase()
-    {
-        float dir = player.position.x > transform.position.x ? 1f : -1f;
-        rb.linearVelocity = new Vector2(dir * chaseSpeed, rb.linearVelocity.y);
-        FaceTarget(player.position.x);
-    }
-
-    // ── Attack coroutine ──────────────────────────────────────────────────
     IEnumerator AttackRoutine()
     {
         attackRunning = true;
         lastAttackTime = Time.time;
 
-        // Stop and face player
+        // Freeze during windup
+        rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
         rb.linearVelocity = Vector2.zero;
         FaceTarget(player.position.x);
         state = State.Attack;
 
-        // Trigger attack animation
         if (animator != null)
         {
             animator.SetBool("isWalking", false);
@@ -161,10 +145,11 @@ public class ProwlerAI : MonoBehaviour
             animator.SetTrigger("Attack");
         }
 
-        // Brief wind-up pause
         yield return new WaitForSeconds(0.2f);
 
-        // Leap toward player
+        // Unlock X for leap
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
         float leapDir = player.position.x > transform.position.x ? 1f : -1f;
         float timer = 0f;
         bool hitDealt = false;
@@ -173,7 +158,6 @@ public class ProwlerAI : MonoBehaviour
         {
             rb.linearVelocity = new Vector2(leapDir * leapSpeed, rb.linearVelocity.y);
 
-            // Deal damage once when close enough
             if (!hitDealt)
             {
                 float dx = Mathf.Abs(transform.position.x - player.position.x);
@@ -198,13 +182,13 @@ public class ProwlerAI : MonoBehaviour
             yield return null;
         }
 
-        // Hard stop
+        // Hard stop + freeze after leap
+        rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
-        // Short land recovery
         yield return new WaitForSeconds(0.2f);
 
-        // Enter idle — prowler sits and recovers like a real predator
+        // Idle
         state = State.Idle;
         if (animator != null)
         {
@@ -214,7 +198,9 @@ public class ProwlerAI : MonoBehaviour
 
         yield return new WaitForSeconds(idleDuration);
 
-        // Done — back to chasing
+        // Back to chase — unlock X
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
         if (animator != null)
         {
             animator.SetBool("isIdle", false);
@@ -226,7 +212,23 @@ public class ProwlerAI : MonoBehaviour
         attackRunning = false;
     }
 
-    // ── Facing ────────────────────────────────────────────────────────────
+    void DoPatrol()
+    {
+        float distFromOrigin = transform.position.x - patrolOrigin.x;
+        if (distFromOrigin >= patrolDistance)  patrolDir = -1f;
+        if (distFromOrigin <= -patrolDistance) patrolDir =  1f;
+
+        rb.linearVelocity = new Vector2(patrolDir * walkSpeed, rb.linearVelocity.y);
+        FaceTarget(transform.position.x + patrolDir);
+    }
+
+    void DoChase()
+    {
+        float dir = player.position.x > transform.position.x ? 1f : -1f;
+        rb.linearVelocity = new Vector2(dir * chaseSpeed, rb.linearVelocity.y);
+        FaceTarget(player.position.x);
+    }
+
     void FaceTarget(float targetX)
     {
         if (graphics == null) return;
@@ -237,17 +239,16 @@ public class ProwlerAI : MonoBehaviour
         graphics.localScale = s;
     }
 
-    // ── Death ─────────────────────────────────────────────────────────────
     public void TakeDamage()
     {
         if (isDead) return;
         isDead = true;
         StopAllCoroutines();
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         rb.linearVelocity = Vector2.zero;
         Destroy(gameObject);
     }
 
-    // ── Gizmos ────────────────────────────────────────────────────────────
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
@@ -256,7 +257,7 @@ public class ProwlerAI : MonoBehaviour
         Gizmos.DrawWireSphere(transform.position, attackRange);
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(
-            transform.position + Vector3.left * patrolDistance,
+            transform.position + Vector3.left  * patrolDistance,
             transform.position + Vector3.right * patrolDistance);
     }
 }

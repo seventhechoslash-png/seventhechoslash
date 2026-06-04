@@ -5999,12 +5999,12 @@ MonoBehaviour:
   walkSpeed: 2.5
   patrolDistance: 6
   chaseSpeed: 9
-  detectionRange: 10
+  detectionRange: 15
   attackRange: 7
-  attackCooldown: 0.5
+  attackCooldown: 1
   leapSpeed: 14
   leapDuration: 0.3
-  idleDuration: 1
+  idleDuration: 0.5
   damage: 0
   player: {fileID: 1143491695}
   graphics: {fileID: 667807421}
@@ -6028,7 +6028,7 @@ Rigidbody2D:
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 1
-  m_Material: {fileID: 6200000, guid: f382d46c76d64d04890569b54e6b0917, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -6049,7 +6049,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 6200000, guid: f382d46c76d64d04890569b54e6b0917, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -6073,8 +6073,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -0.7176436, y: -16.058199}
-  m_Size: {x: 7.4803224, y: 3.3912969}
+  m_Offset: {x: 0.08495375, y: -16.414156}
+  m_Size: {x: 5.875177, y: 2.6793826}
   m_Direction: 1
 --- !u!1 &667807420
 GameObject:
@@ -6178,7 +6178,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 11
+  m_SortingOrder: 12
   m_MaskInteraction: 0
   m_Sprite: {fileID: -2301900891250477048, guid: bae1c96d0f5c5204bacd025fb632932a, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
