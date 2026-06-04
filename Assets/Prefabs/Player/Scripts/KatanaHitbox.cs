@@ -8,17 +8,15 @@ public class KatanaHitbox : MonoBehaviour
     {
         hitCollider = GetComponent<Collider2D>();
         if (hitCollider != null)
-            hitCollider.enabled = false; // Off by default
+            hitCollider.enabled = false;
     }
 
-    // Called by Animation Event at the START of the swing frame
     public void EnableHitbox()
     {
         if (hitCollider != null)
             hitCollider.enabled = true;
     }
 
-    // Called by Animation Event at the END of the swing frame
     public void DisableHitbox()
     {
         if (hitCollider != null)
@@ -27,10 +25,20 @@ public class KatanaHitbox : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        StalkerHealth enemy = other.GetComponent<StalkerHealth>();
-        if (enemy != null)
+        // Hit Stalker
+        StalkerHealth stalker = other.GetComponent<StalkerHealth>();
+        if (stalker != null)
         {
-            enemy.TakeDamage();
+            stalker.TakeDamage();
+            return;
+        }
+
+        // Hit Prowler
+        ProwlerAI prowler = other.GetComponent<ProwlerAI>();
+        if (prowler != null)
+        {
+            prowler.TakeDamage();
+            return;
         }
     }
 }

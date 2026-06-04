@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class StalkerHealth : MonoBehaviour
 {
-    [Header("Death Effect")]
-    public GameObject deathExplosionPrefab; // Assign your VFX prefab here
-
     public void TakeDamage()
     {
         Die();
@@ -12,9 +9,10 @@ public class StalkerHealth : MonoBehaviour
 
     private void Die()
     {
-        if (deathExplosionPrefab != null)
-            Instantiate(deathExplosionPrefab, transform.position, Quaternion.identity);
-
-        Destroy(gameObject);
+        StalkerDeathEffect effect = GetComponent<StalkerDeathEffect>();
+        if (effect != null)
+            effect.PlayDeathEffect();
+        else
+            Destroy(gameObject);
     }
 }

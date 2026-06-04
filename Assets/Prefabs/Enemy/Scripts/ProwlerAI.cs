@@ -244,9 +244,13 @@ public class ProwlerAI : MonoBehaviour
         if (isDead) return;
         isDead = true;
         StopAllCoroutines();
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         rb.linearVelocity = Vector2.zero;
-        Destroy(gameObject);
+
+        ProwlerDeathEffect effect = GetComponent<ProwlerDeathEffect>();
+        if (effect != null)
+            effect.PlayDeathEffect();
+        else
+            Destroy(gameObject);
     }
 
     void OnDrawGizmosSelected()
