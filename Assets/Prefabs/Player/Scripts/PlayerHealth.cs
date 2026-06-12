@@ -15,17 +15,30 @@ public class PlayerHealth : MonoBehaviour
     public SpriteRenderer spriteRenderer;
     public float flashDuration = 0.1f;
 
+    [Header("Hurt Reference")]
+    [Tooltip("ChestPoint transform — hits above this trigger UpperHurt, below trigger MiddleHurt")]
+    public Transform chestPoint;
+
     private Rigidbody2D rb;
+    private Animator animator;
     private bool isKnocked;
     private bool isDead;
 
     void Start()
     {
         currentHealth = maxHealth;
-        rb = GetComponent<Rigidbody2D>();
+        rb            = GetComponent<Rigidbody2D>();
+        animator      = GetComponentInChildren<Animator>();
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+
+        // Auto-find ChestPoint if not assigned
+        if (chestPoint == null)
+        {
+            Transform g = transform.Find("Graphics");
+            if (g != null) chestPoint = g.Find("ChestPoint");
+        }
 
         if (HealthUI.Instance != null)
             HealthUI.Instance.UpdateHealth(currentHealth, maxHealth);
@@ -38,6 +51,9 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth -= damage;
         Debug.Log("Player Hit! Health: " + currentHealth);
+
+        // Trigger correct hurt animation based on hit origin Y vs ChestPoint Y
+        TriggerHurtAnimation(hitDirection);
 
         if (rb != null)
             StartCoroutine(ApplyKnockback(hitDirection));
@@ -52,6 +68,31 @@ public class PlayerHealth : MonoBehaviour
 
         if (currentHealth <= 0)
             Die();
+    }
+
+    void TriggerHurtAnimation(Vector2 hitDirection)
+    {
+        if (animator == null) return;
+
+        // Determine if hit came from above or below the chest
+        // hitDirection.y > 0 means enemy hit upward (player was hit from below/middle)
+        // hitDirection.y < 0 means hit came downward (upper body hit like Stalker laser)
+        // We also check the chest world Y as fallback
+
+        bool isUpperHit = hitDirection.y < 0f; // downward force = upper body hit
+
+        // If hitDirection is mostly horizontal (like Prowler leap),
+        // use ChestPoint Y to decide based on enemy position
+        if (Mathf.Abs(hitDirection.y) < 0.3f && chestPoint != null)
+        {
+            // Horizontal hit — Prowler is ground level so it's always middle
+            isUpperHit = false;
+        }
+
+        if (isUpperHit)
+            animator.SetTrigger("upperHurt");
+        else
+            animator.SetTrigger("middleHurt");
     }
 
     IEnumerator ApplyKnockback(Vector2 dir)
@@ -75,24 +116,22 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isDead) return;
         isDead = true;
-
         Debug.Log("Player Dead");
 
-        Animator anim = GetComponentInChildren<Animator>();
-        if (anim != null)
-            anim.SetBool("isDead", true);
+        if (animator != null)
+            animator.SetBool("isDead", true);
 
         PlayerMovement movement = GetComponent<PlayerMovement>();
-        if (movement != null)
-            movement.enabled = false;
+        if (movement != null) movement.enabled = false;
+
+        PlayerCombat combat = GetComponent<PlayerCombat>();
+        if (combat != null) combat.enabled = false;
 
         if (rb != null)
         {
             rb.linearVelocity = Vector2.zero;
-            // Keep Dynamic so gravity pulls body to ground
-            rb.gravityScale = 3f;
-            // Only freeze rotation so body doesnt spin
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.gravityScale   = 3f;
+            rb.constraints    = RigidbodyConstraints2D.FreezeRotation;
         }
     }
 }

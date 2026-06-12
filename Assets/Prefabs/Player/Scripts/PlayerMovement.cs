@@ -1,6 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Handles: movement, jump, dash, ground check, physics, facing.
+/// Reads combat state from PlayerState to know when to lock movement.
+/// </summary>
 public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")]
@@ -32,32 +36,19 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("Slope Stick")]
     public bool stopSlidingWhenIdle = true;
-    public float idleSlopeStickVelocity = 0.05f;
 
     [Header("Physics Material")]
     public PhysicsMaterial2D noFrictionMaterial;
 
-    [Header("Attack")]
-    public string attackTrigger = "attack";
+    [Header("Movement Lock")]
     public bool lockMovementDuringAttack = true;
-
-    [Header("Block")]
     public bool lockMovementDuringBlock = true;
-
-    [Header("Vertical Attack")]
-    public string verticalAttackTrigger = "verticalAttack";
-    [Tooltip("Normalized time (0-1) at which hold-V freezes the animation. Tune per spritesheet: 6fr=0.16  8fr=0.12  10fr=0.10  12fr=0.08")]
-    public float verticalAttackHoldFrameTime = 0.08f;
-
-    [Header("Animator")]
-    public string didJumpBool = "didJump";
 
     [Header("Dash")]
     public float dashSpeed = 18f;
     public float dashMinDuration = 0.4f;
     public float dashCooldown = 0.8f;
     public float doubleTapWindow = 0.25f;
-    public float dashParticleVelocityX = 15f;
 
     [Header("Debug")]
     public bool debugGround = false;
@@ -65,78 +56,38 @@ public class PlayerMovement : MonoBehaviour
     // ── Components ──
     private Rigidbody2D rb;
     private CapsuleCollider2D capsule;
-    private Animator animator;
     private Transform graphics;
     private PlayerInputActions input;
-    private ParticleSystem dashParticles;
+    private PlayerState state;
 
-    // ── Input flags ──
-    private Vector2 moveInput;
-    private bool jumpPressed;
-    private bool jumpHeld;
-    private bool crouchHeld;
-    private bool attackPressed;
-    private bool blockHeld;
-    private bool verticalAttackPressed;
-    private bool verticalAttackHeld;
-
-    // ── State ──
-    private bool isGrounded;
-    private bool didJump;
-    private bool isAttacking;
-    private bool isVerticalAttacking;
-    private bool isVerticalAttackHolding;
-    private bool isBlocking;
-    private bool isCrouchBlocking;
+    // ── Internal movement state ──
     private float lastGroundedTime;
-
-    // ── Ground tracking ──
-    private Vector2 groundNormal = Vector2.up;
-    private Collider2D currentGroundCollider;
-    private Rigidbody2D currentGroundRigidbody;
-    private Vector2 currentGroundVelocity;
-
-    // ── Dash ──
-    private bool isDashing = false;
     private float dashDirection = 0f;
     private float dashCooldownRemaining = 0f;
     private float dashTimeRemaining = 0f;
-
-    // ── Double tap tracking ──
-    private float lastRightTapTime = -999f;
-    private float lastLeftTapTime = -999f;
     private bool prevRightHeld = false;
     private bool prevLeftHeld = false;
+    private float lastRightTapTime = -999f;
+    private float lastLeftTapTime = -999f;
 
-    // ── Public accessors ──
-    public bool IsGrounded => isGrounded;
-    public Collider2D GroundCollider => currentGroundCollider;
-    public bool IsBlocking => isBlocking;
-    public bool IsCrouchBlocking => isCrouchBlocking;
-    public bool IsVerticalAttacking => isVerticalAttacking;
-    public bool IsDashing => isDashing;
+    // ── Public accessors (for backward compat with PlayerGuard etc) ──
+    public bool IsGrounded       => state.isGrounded;
+    public bool IsDashing        => state.isDashing;
+    public bool IsBlocking       => state.isBlocking;
+    public bool IsCrouchBlocking => state.isCrouchBlocking;
+    public bool IsVerticalAttacking => state.isVerticalAttacking;
+    public Collider2D GroundCollider => state.groundCollider;
 
     private void Awake()
     {
         rb      = GetComponent<Rigidbody2D>();
         capsule = GetComponent<CapsuleCollider2D>();
-
-        animator = GetComponent<Animator>();
-        if (animator == null)
-            animator = GetComponentInChildren<Animator>();
+        state   = GetComponent<PlayerState>();
 
         Transform graphicsChild = transform.Find("Graphics");
-        if (graphicsChild != null)
-            graphics = graphicsChild;
-        else
-        {
-            SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
-            graphics = sr != null ? sr.transform : transform;
-        }
-
-        dashParticles = GetComponent<ParticleSystem>();
-        if (dashParticles == null)
-            dashParticles = GetComponentInChildren<ParticleSystem>();
+        graphics = graphicsChild != null
+            ? graphicsChild
+            : GetComponentInChildren<SpriteRenderer>()?.transform ?? transform;
 
         input = new PlayerInputActions();
         rb.linearDamping = 0f;
@@ -144,9 +95,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (groundLayer.value == 0)
         {
-            int groundIndex = LayerMask.NameToLayer("Ground");
-            if (groundIndex >= 0)
-                groundLayer = 1 << groundIndex;
+            int idx = LayerMask.NameToLayer("Ground");
+            if (idx >= 0) groundLayer = 1 << idx;
         }
 
         if (noFrictionMaterial != null && capsule != null)
@@ -156,56 +106,42 @@ public class PlayerMovement : MonoBehaviour
     private void OnEnable()
     {
         input.Player.Enable();
-        input.Player.Move.performed += OnMove;
-        input.Player.Move.canceled  += OnMoveCancel;
-        input.Player.Jump.performed += OnJump;
-        input.Player.Jump.canceled  += OnJumpCancel;
+        input.Player.Move.performed   += OnMove;
+        input.Player.Move.canceled    += OnMoveCancel;
+        input.Player.Jump.performed   += OnJump;
+        input.Player.Jump.canceled    += OnJumpCancel;
         input.Player.Crouch.performed += OnCrouch;
         input.Player.Crouch.canceled  += OnCrouchCancel;
-        try { input.Player.Attack.performed += OnAttack; } catch { }
-        try { input.Player.Block.performed += OnBlockPerformed; input.Player.Block.canceled += OnBlockCanceled; } catch { }
-        try { input.Player.VerticalAttack.performed += OnVerticalAttack; input.Player.VerticalAttack.canceled += OnVerticalAttackCanceled; } catch { }
     }
 
     private void OnDisable()
     {
-        input.Player.Move.performed -= OnMove;
-        input.Player.Move.canceled  -= OnMoveCancel;
-        input.Player.Jump.performed -= OnJump;
-        input.Player.Jump.canceled  -= OnJumpCancel;
+        input.Player.Move.performed   -= OnMove;
+        input.Player.Move.canceled    -= OnMoveCancel;
+        input.Player.Jump.performed   -= OnJump;
+        input.Player.Jump.canceled    -= OnJumpCancel;
         input.Player.Crouch.performed -= OnCrouch;
         input.Player.Crouch.canceled  -= OnCrouchCancel;
-        try { input.Player.Attack.performed -= OnAttack; } catch { }
-        try { input.Player.Block.performed -= OnBlockPerformed; input.Player.Block.canceled -= OnBlockCanceled; } catch { }
-        try { input.Player.VerticalAttack.performed -= OnVerticalAttack; input.Player.VerticalAttack.canceled -= OnVerticalAttackCanceled; } catch { }
         input.Player.Disable();
     }
 
     private void OnApplicationFocus(bool hasFocus)
     {
-        if (!hasFocus) ClearAllInput();
-    }
-
-    private void ClearAllInput()
-    {
-        moveInput               = Vector2.zero;
-        jumpPressed             = false;
-        jumpHeld                = false;
-        crouchHeld              = false;
-        attackPressed           = false;
-        blockHeld               = false;
-        verticalAttackPressed   = false;
-        verticalAttackHeld      = false;
-        isVerticalAttackHolding = false;
-        prevRightHeld           = false;
-        prevLeftHeld            = false;
-        if (animator != null) animator.speed = 1f;
+        if (!hasFocus)
+        {
+            state.moveInput  = Vector2.zero;
+            state.jumpPressed = false;
+            state.jumpHeld    = false;
+            state.crouchHeld  = false;
+            prevRightHeld = false;
+            prevLeftHeld  = false;
+        }
     }
 
     private void Update()
     {
-        bool rightHeld = moveInput.x > 0.5f;
-        bool leftHeld  = moveInput.x < -0.5f;
+        bool rightHeld = state.moveInput.x > 0.5f;
+        bool leftHeld  = state.moveInput.x < -0.5f;
 
         if (rightHeld && !prevRightHeld)
         {
@@ -227,23 +163,7 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckGrounded();
 
-        if (animator != null)
-        {
-            AnimatorStateInfo st = animator.GetCurrentAnimatorStateInfo(0);
-            isVerticalAttacking = st.IsName("VerticalAttack");
-            isAttacking         = st.IsName("Attack") || st.IsName("SitAttack") || isVerticalAttacking;
-        }
-        else
-        {
-            isAttacking         = false;
-            isVerticalAttacking = false;
-        }
-
-        // Standing block: G held, NOT crouching
-        isBlocking = blockHeld && isGrounded && !isAttacking && !isDashing && !crouchHeld;
-
-        // Crouch block: G held AND C held while grounded
-        isCrouchBlocking = blockHeld && crouchHeld && isGrounded && !isAttacking && !isDashing;
+        state.isDashing = state.isDashing; // updated in HandleDash
 
         if (dashCooldownRemaining > 0f)
             dashCooldownRemaining = Mathf.Max(0f, dashCooldownRemaining - Time.fixedDeltaTime);
@@ -252,207 +172,165 @@ public class PlayerMovement : MonoBehaviour
         HandleMovement();
         HandleJump();
         ApplyBetterGravity();
-        HandleAttack();
-        UpdateAnimator();
 
-        jumpPressed           = false;
-        attackPressed         = false;
-        verticalAttackPressed = false;
+        // Write velocity to state for animator
+        state.velocity = rb.linearVelocity;
+
+        state.jumpPressed = false;
     }
 
     private void TryStartDash(float dir)
     {
-        if (isDashing) return;
-        if (!isGrounded) return;
+        if (state.isDashing) return;
+        if (!state.isGrounded) return;
         if (dashCooldownRemaining > 0f) return;
-        if (crouchHeld) return;
-        if (lockMovementDuringAttack && isAttacking) return;
-        if (lockMovementDuringBlock && blockHeld) return;
+        if (state.crouchHeld) return;
+        if (lockMovementDuringAttack && state.isAttacking) return;
+        if (lockMovementDuringBlock && (state.isBlocking || state.isCrouchBlocking)) return;
 
         dashDirection         = dir;
-        isDashing             = true;
+        state.isDashing       = true;
         dashTimeRemaining     = dashMinDuration;
         dashCooldownRemaining = dashCooldown;
-
-        if (dashParticles != null)
-        {
-            var vel = dashParticles.velocityOverLifetime;
-            vel.enabled = true;
-            vel.x = new ParticleSystem.MinMaxCurve(dir > 0f ? -dashParticleVelocityX : dashParticleVelocityX);
-            vel.y = new ParticleSystem.MinMaxCurve(0f);
-            vel.z = new ParticleSystem.MinMaxCurve(0f);
-            dashParticles.Play();
-        }
     }
 
     private void HandleDash()
     {
-        if (!isDashing) return;
+        if (!state.isDashing) return;
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-        if (isAttacking)
+        if (state.isAttacking)
         {
-            isDashing = false;
+            state.isDashing   = false;
             dashTimeRemaining = 0f;
-            if (dashParticles != null) dashParticles.Stop();
             return;
         }
 
-        if (!isGrounded)
+        if (!state.isGrounded)
         {
-            isDashing = false;
-            if (dashParticles != null) dashParticles.Stop();
+            state.isDashing = false;
             return;
         }
 
         dashTimeRemaining -= Time.fixedDeltaTime;
 
-        float rawX = moveInput.x;
+        float rawX = state.moveInput.x;
         bool stillHolding = (dashDirection > 0f && rawX > 0.1f) ||
                             (dashDirection < 0f && rawX < -0.1f);
 
         if (dashTimeRemaining > 0f || stillHolding)
             rb.linearVelocity = new Vector2(dashDirection * dashSpeed, 0f);
         else
-        {
-            isDashing = false;
-            if (dashParticles != null) dashParticles.Stop();
-        }
+            state.isDashing = false;
     }
 
     private void CheckGrounded()
     {
         if (capsule == null)
         {
-            isGrounded             = false;
-            groundNormal           = Vector2.up;
-            currentGroundCollider  = null;
-            currentGroundRigidbody = null;
-            currentGroundVelocity  = Vector2.zero;
+            state.isGrounded     = false;
+            state.groundNormal   = Vector2.up;
+            state.groundCollider = null;
+            state.groundVelocity = Vector2.zero;
             return;
         }
 
         RaycastHit2D hit = Physics2D.CapsuleCast(
-            capsule.bounds.center,
-            capsule.bounds.size,
-            capsule.direction,
-            0f,
-            Vector2.down,
-            groundCheckDistance,
-            groundLayer
+            capsule.bounds.center, capsule.bounds.size,
+            capsule.direction, 0f,
+            Vector2.down, groundCheckDistance, groundLayer
         );
 
         bool validSurface = hit.collider != null && hit.normal.y >= minGroundNormalY;
 
         if (validSurface)
         {
-            Vector2 hitGroundVelocity = GetGroundVelocity(hit.collider, hit.rigidbody);
-            float relativeY           = rb.linearVelocity.y - hitGroundVelocity.y;
+            Vector2 groundVel = GetGroundVelocity(hit.collider, hit.rigidbody);
+            float relativeY   = rb.linearVelocity.y - groundVel.y;
 
             if (relativeY <= jumpGroundedMaxRelativeYSpeed)
             {
-                isGrounded             = true;
-                lastGroundedTime       = Time.time;
-                didJump                = false;
-                groundNormal           = hit.normal;
-                currentGroundCollider  = hit.collider;
-                currentGroundRigidbody = hit.rigidbody;
-                currentGroundVelocity  = hitGroundVelocity;
-
-                if (debugGround)
-                    Debug.Log($"[GROUND] grounded=true hit={hit.collider.name} dist={hit.distance:F4} normal={hit.normal} playerVy={rb.linearVelocity.y:F3} groundVy={currentGroundVelocity.y:F3} relY={relativeY:F3}", this);
-
+                state.isGrounded     = true;
+                lastGroundedTime     = Time.time;
+                state.didJump        = false;
+                state.groundNormal   = hit.normal;
+                state.groundCollider = hit.collider;
+                state.groundVelocity = groundVel;
                 return;
             }
         }
 
-        float relativeYDuringGrace = rb.linearVelocity.y - currentGroundVelocity.y;
-        bool  withinGrace          = (Time.time - lastGroundedTime) <= groundedGraceTime;
-        isGrounded = withinGrace && relativeYDuringGrace <= coyoteGroundedMaxRelativeYSpeed;
+        float relY        = rb.linearVelocity.y - state.groundVelocity.y;
+        bool withinGrace  = (Time.time - lastGroundedTime) <= groundedGraceTime;
+        state.isGrounded  = withinGrace && relY <= coyoteGroundedMaxRelativeYSpeed;
 
-        if (isGrounded)
-            didJump = false;
+        if (state.isGrounded)
+            state.didJump = false;
         else
         {
-            groundNormal           = Vector2.up;
-            currentGroundCollider  = null;
-            currentGroundRigidbody = null;
-            currentGroundVelocity  = Vector2.zero;
-        }
-
-        if (debugGround)
-        {
-            if (hit.collider != null)
-            {
-                Vector2 hgv = GetGroundVelocity(hit.collider, hit.rigidbody);
-                float relY  = rb.linearVelocity.y - hgv.y;
-                Debug.Log($"[GROUND] grounded={isGrounded} hit={hit.collider.name} dist={hit.distance:F4} normal={hit.normal} playerVy={rb.linearVelocity.y:F3} groundVy={hgv.y:F3} relY={relY:F3}", this);
-            }
-            else
-                Debug.Log($"[GROUND] grounded={isGrounded} hit=null playerVy={rb.linearVelocity.y:F3} groundVy={currentGroundVelocity.y:F3}", this);
+            state.groundNormal   = Vector2.up;
+            state.groundCollider = null;
+            state.groundVelocity = Vector2.zero;
         }
     }
 
     private Vector2 GetGroundVelocity(Collider2D hitCollider, Rigidbody2D hitRb)
     {
         if (hitCollider == null) return Vector2.zero;
-
-        MovingPlatform movingPlatform = hitCollider.GetComponent<MovingPlatform>();
-        if (movingPlatform == null) movingPlatform = hitCollider.GetComponentInParent<MovingPlatform>();
-        if (movingPlatform != null) return movingPlatform.Velocity;
-
+        MovingPlatform mp = hitCollider.GetComponent<MovingPlatform>()
+                         ?? hitCollider.GetComponentInParent<MovingPlatform>();
+        if (mp != null) return mp.Velocity;
         if (hitRb != null) return hitRb.linearVelocity;
-
         return Vector2.zero;
     }
 
     private void HandleMovement()
     {
-        if (isDashing) return;
+        if (state.isDashing) return;
 
-        // Lock movement during both standing block and crouch block
-        if (lockMovementDuringBlock && (isBlocking || isCrouchBlocking))
+        if (lockMovementDuringBlock && (state.isBlocking || state.isCrouchBlocking))
         {
-            rb.linearVelocity = new Vector2(currentGroundVelocity.x, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(state.groundVelocity.x, rb.linearVelocity.y);
             return;
         }
 
-        if (lockMovementDuringAttack && isAttacking)
+        if (lockMovementDuringAttack && state.isAttacking)
         {
-            rb.linearVelocity = new Vector2(currentGroundVelocity.x, rb.linearVelocity.y);
+            rb.linearVelocity = new Vector2(state.groundVelocity.x, rb.linearVelocity.y);
             return;
         }
 
-        float rawX = moveInput.x;
+        float rawX = state.moveInput.x;
         if (Mathf.Abs(rawX) < inputDeadzone) rawX = 0f;
 
-        // Keep crouched during crouch block too
-        float targetX = ((crouchHeld || isCrouchBlocking) && isGrounded) ? 0f : rawX * moveSpeed;
+        float targetX = ((state.crouchHeld || state.isCrouchBlocking) && state.isGrounded)
+            ? 0f
+            : rawX * moveSpeed;
 
-        if (isGrounded)
+        if (state.isGrounded)
         {
-            float finalX = targetX + currentGroundVelocity.x;
+            float finalX = targetX + state.groundVelocity.x;
             rb.linearVelocity = new Vector2(finalX, rb.linearVelocity.y);
 
             if (stopSlidingWhenIdle && rawX == 0f)
             {
-                rb.linearVelocity = new Vector2(currentGroundVelocity.x, currentGroundVelocity.y);
+                rb.linearVelocity = new Vector2(state.groundVelocity.x, state.groundVelocity.y);
 
-                bool onMovingPlatform = currentGroundCollider != null &&
-                                        currentGroundCollider.GetComponentInParent<MovingPlatform>() != null;
+                bool onMovingPlatform = state.groundCollider != null &&
+                    state.groundCollider.GetComponentInParent<MovingPlatform>() != null;
 
-                if (!onMovingPlatform)
-                    rb.constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
-                else
-                    rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+                rb.constraints = onMovingPlatform
+                    ? RigidbodyConstraints2D.FreezeRotation
+                    : RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
             }
             else
             {
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
             }
 
-            if (forceStopXWhenIdle && rawX == 0f && Mathf.Abs(rb.linearVelocity.x - currentGroundVelocity.x) <= idleStopVelEpsilon)
-                rb.linearVelocity = new Vector2(currentGroundVelocity.x, rb.linearVelocity.y);
+            if (forceStopXWhenIdle && rawX == 0f &&
+                Mathf.Abs(rb.linearVelocity.x - state.groundVelocity.x) <= idleStopVelEpsilon)
+                rb.linearVelocity = new Vector2(state.groundVelocity.x, rb.linearVelocity.y);
         }
         else
         {
@@ -471,183 +349,61 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleJump()
     {
-        if (!jumpPressed) return;
-        if (isBlocking || isCrouchBlocking) return;
+        if (!state.jumpPressed) return;
+        if (state.isBlocking || state.isCrouchBlocking) return;
 
-        if (isDashing)
+        if (state.isDashing)
         {
-            isDashing         = false;
+            state.isDashing   = false;
             dashTimeRemaining = 0f;
-            if (dashParticles != null) dashParticles.Stop();
         }
 
-        float relativeY   = rb.linearVelocity.y - currentGroundVelocity.y;
+        float relativeY   = rb.linearVelocity.y - state.groundVelocity.y;
         bool withinGrace  = (Time.time - lastGroundedTime) <= groundedGraceTime;
         bool canUseCoyote = withinGrace && relativeY <= coyoteGroundedMaxRelativeYSpeed;
 
-        if (!(isGrounded || canUseCoyote)) return;
-        if (crouchHeld) return;
-        if (lockMovementDuringAttack && isAttacking) return;
+        if (!(state.isGrounded || canUseCoyote)) return;
+        if (state.crouchHeld) return;
+        if (lockMovementDuringAttack && state.isAttacking) return;
 
-        rb.constraints         = RigidbodyConstraints2D.FreezeRotation;
-        rb.linearVelocity      = new Vector2(rb.linearVelocity.x, jumpForce);
-        isGrounded             = false;
-        didJump                = true;
-        currentGroundCollider  = null;
-        currentGroundRigidbody = null;
-        currentGroundVelocity  = Vector2.zero;
-        groundNormal           = Vector2.up;
+        rb.constraints        = RigidbodyConstraints2D.FreezeRotation;
+        rb.linearVelocity     = new Vector2(rb.linearVelocity.x, jumpForce);
+        state.isGrounded      = false;
+        state.didJump         = true;
+        state.groundCollider  = null;
+        state.groundVelocity  = Vector2.zero;
+        state.groundNormal    = Vector2.up;
     }
 
     private void ApplyBetterGravity()
     {
-        if (isDashing) return;
+        if (state.isDashing) return;
 
         if (rb.linearVelocity.y < 0f)
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime;
-        else if (rb.linearVelocity.y > 0f && !jumpHeld)
+        else if (rb.linearVelocity.y > 0f && !state.jumpHeld)
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (jumpCutMultiplier - 1f) * Time.fixedDeltaTime;
-        else if (Mathf.Abs(rb.linearVelocity.y) < 0.1f && !isGrounded)
+        else if (Mathf.Abs(rb.linearVelocity.y) < 0.1f && !state.isGrounded)
             rb.linearVelocity += Vector2.down * apexDownBoost * Time.fixedDeltaTime;
     }
 
-    private void HandleAttack()
-    {
-        if (animator == null) return;
-        if (isBlocking || isCrouchBlocking) return;
-
-        if (isVerticalAttacking)
-        {
-            AnimatorStateInfo st = animator.GetCurrentAnimatorStateInfo(0);
-            float normalizedTime = st.normalizedTime % 1f;
-
-            if (verticalAttackHeld &&
-                normalizedTime >= verticalAttackHoldFrameTime &&
-                normalizedTime < verticalAttackHoldFrameTime + 0.05f &&
-                !isVerticalAttackHolding)
-            {
-                animator.speed = 0f;
-                isVerticalAttackHolding = true;
-            }
-
-            if (isVerticalAttackHolding && !verticalAttackHeld)
-            {
-                animator.speed = 1f;
-                isVerticalAttackHolding = false;
-            }
-
-            return;
-        }
-
-        if (animator.speed == 0f) animator.speed = 1f;
-        if (isAttacking) return;
-
-        if (verticalAttackPressed)
-        {
-            animator.ResetTrigger(verticalAttackTrigger);
-            animator.SetTrigger(verticalAttackTrigger);
-            attackPressed = false;
-            return;
-        }
-
-        if (!attackPressed) return;
-        animator.ResetTrigger(attackTrigger);
-        animator.SetTrigger(attackTrigger);
-    }
-
-    private void UpdateAnimator()
-    {
-        if (animator == null) return;
-
-        AnimatorStateInfo st = animator.GetCurrentAnimatorStateInfo(0);
-        if (st.IsName("Death")) return;
-
-        // Stay crouched during crouch block
-        bool isCrouching = (crouchHeld || isCrouchBlocking) && isGrounded;
-        bool allowRun    = !(lockMovementDuringAttack && isAttacking) && !isBlocking && !isCrouchBlocking;
-        bool isRunning   = allowRun && Mathf.Abs(moveInput.x) > 0.1f && isGrounded && !isCrouching;
-
-        SetAnimatorBoolIfExists("isGrounded",          isGrounded);
-        SetAnimatorBoolIfExists("isCrouching",         isCrouching);
-        SetAnimatorBoolIfExists("isRunning",           isRunning);
-        SetAnimatorBoolIfExists("isBlocking",          isBlocking);
-        SetAnimatorBoolIfExists("isCrouchGuard",       isCrouchBlocking);
-        SetAnimatorBoolIfExists("isVerticalAttacking", isVerticalAttacking);
-        SetAnimatorBoolIfExists("isDashing",           isDashing);
-        SetAnimatorBoolIfExists(didJumpBool,           didJump);
-        SetAnimatorFloatIfExists("yVelocity",          rb.linearVelocity.y);
-    }
-
-    private void SetAnimatorBoolIfExists(string param, bool value)
-    {
-        if (animator == null || string.IsNullOrEmpty(param)) return;
-        for (int i = 0; i < animator.parameterCount; i++)
-        {
-            AnimatorControllerParameter p = animator.GetParameter(i);
-            if (p.name == param && p.type == AnimatorControllerParameterType.Bool)
-            {
-                animator.SetBool(param, value);
-                return;
-            }
-        }
-    }
-
-    private void SetAnimatorFloatIfExists(string param, float value)
-    {
-        if (animator == null || string.IsNullOrEmpty(param)) return;
-        for (int i = 0; i < animator.parameterCount; i++)
-        {
-            AnimatorControllerParameter p = animator.GetParameter(i);
-            if (p.name == param && p.type == AnimatorControllerParameterType.Float)
-            {
-                animator.SetFloat(param, value);
-                return;
-            }
-        }
-    }
-
-    private void OnMove(InputAction.CallbackContext ctx)         => moveInput = ctx.ReadValue<Vector2>();
-    private void OnMoveCancel(InputAction.CallbackContext ctx)   => moveInput = Vector2.zero;
-    private void OnJump(InputAction.CallbackContext ctx)         { jumpPressed = true; jumpHeld = true; }
-    private void OnJumpCancel(InputAction.CallbackContext ctx)   => jumpHeld = false;
-    private void OnCrouch(InputAction.CallbackContext ctx)       => crouchHeld = true;
-    private void OnCrouchCancel(InputAction.CallbackContext ctx) => crouchHeld = false;
-
-    private void OnAttack(InputAction.CallbackContext ctx)
-    {
-        attackPressed = true;
-        if (animator != null && !isAttacking && !isBlocking && !isCrouchBlocking)
-        {
-            animator.ResetTrigger(attackTrigger);
-            animator.SetTrigger(attackTrigger);
-        }
-    }
-
-    private void OnBlockPerformed(InputAction.CallbackContext ctx) => blockHeld = true;
-    private void OnBlockCanceled(InputAction.CallbackContext ctx)  => blockHeld = false;
-
-    private void OnVerticalAttack(InputAction.CallbackContext ctx)
-    {
-        verticalAttackPressed = true;
-        verticalAttackHeld    = true;
-    }
-
-    private void OnVerticalAttackCanceled(InputAction.CallbackContext ctx)
-    {
-        verticalAttackHeld = false;
-    }
+    // ── Input Callbacks ───────────────────────────────────────────────────
+    private void OnMove(InputAction.CallbackContext ctx)         => state.moveInput = ctx.ReadValue<Vector2>();
+    private void OnMoveCancel(InputAction.CallbackContext ctx)   => state.moveInput = Vector2.zero;
+    private void OnJump(InputAction.CallbackContext ctx)         { state.jumpPressed = true; state.jumpHeld = true; }
+    private void OnJumpCancel(InputAction.CallbackContext ctx)   => state.jumpHeld = false;
+    private void OnCrouch(InputAction.CallbackContext ctx)       => state.crouchHeld = true;
+    private void OnCrouchCancel(InputAction.CallbackContext ctx) => state.crouchHeld = false;
 
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
         CapsuleCollider2D cap = GetComponent<CapsuleCollider2D>();
         if (cap == null) return;
-
         Gizmos.color = Color.green;
         Vector2 origin  = cap.bounds.center;
         Vector2 size    = cap.bounds.size;
         Vector2 castEnd = origin + Vector2.down * groundCheckDistance;
-
         Gizmos.DrawWireCube(origin, size);
         Gizmos.DrawWireCube(castEnd, size);
         Gizmos.DrawLine(new Vector2(origin.x - size.x * 0.5f, origin.y), new Vector2(castEnd.x - size.x * 0.5f, castEnd.y));
