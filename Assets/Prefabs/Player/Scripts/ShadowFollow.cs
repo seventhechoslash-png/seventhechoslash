@@ -48,7 +48,6 @@ public class ShadowFollow : MonoBehaviour
         currentAlpha = 0f;
         if (sr == null) sr = GetComponent<SpriteRenderer>();
 
-        // Find the player's SpriteRenderer for pose matching
         if (playerGraphics != null)
             playerSprite = playerGraphics.GetComponent<SpriteRenderer>();
 
@@ -64,15 +63,13 @@ public class ShadowFollow : MonoBehaviour
 
     void LateUpdate()
     {
-        // Mirror player's current sprite pose every frame
+        // Mirror player's current sprite pose every frame.
+        // Direction is handled by transform.localScale below — NOT flipX.
         if (playerSprite != null && playerSprite.sprite != null)
         {
-	sr.sprite = playerSprite.sprite;
-	sr.flipX  = playerSprite.flipX;
-	sr.flipX  = playerGraphics != null 
-    ? playerGraphics.lossyScale.x < 0f 
-    : playerSprite.flipX;
-            sr.color  = new Color(0f, 0f, 0f, currentAlpha); // pure black
+            sr.sprite = playerSprite.sprite;
+            sr.flipX  = false; // never use flipX — scale handles direction
+            sr.color  = new Color(0f, 0f, 0f, currentAlpha);
         }
 
         Vector2 origin = new Vector2(player.position.x, player.position.y + rayHeight);
@@ -121,7 +118,6 @@ public class ShadowFollow : MonoBehaviour
                 float speed       = Mathf.Abs(rb.linearVelocity.x);
                 float stretch     = Mathf.Lerp(1f, runStretch, speed / 6f);
 
-                // Use player's actual world scale X, flattened to poseScaleY
                 float playerWorldScaleX = playerSprite != null
                     ? playerSprite.transform.lossyScale.x
                     : baseScale.x;
@@ -129,13 +125,14 @@ public class ShadowFollow : MonoBehaviour
                 float finalScaleX = Mathf.Abs(playerWorldScaleX) * scaleFactor * stretch * impactMultiplier;
                 float finalScaleY = Mathf.Abs(playerWorldScaleX) * poseScaleY * impactMultiplier;
 
-                // Flip direction matches player facing
-		float facingDir = playerGraphics != null && playerGraphics.lossyScale.x < 0f ? -1f : 1f;
-		transform.localScale = new Vector3(
-    		finalScaleX * facingDir,
-    		finalScaleY,
-    		1f
-		);
+                // SINGLE flip method — read facing from Graphics scale sign
+                float facingDir = playerGraphics != null && playerGraphics.lossyScale.x < 0f ? -1f : 1f;
+
+                transform.localScale = new Vector3(
+                    finalScaleX * facingDir,
+                    finalScaleY,
+                    1f
+                );
 
                 float halfWidth = Mathf.Abs(playerWorldScaleX) * 0.5f;
                 RaycastHit2D leftHit  = Physics2D.Raycast(new Vector2(player.position.x - halfWidth, player.position.y + rayHeight), Vector2.down, rayHeight * 2f, groundLayer);

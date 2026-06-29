@@ -70,11 +70,11 @@ public class PlayerMovement : MonoBehaviour
     private float lastRightTapTime = -999f;
     private float lastLeftTapTime = -999f;
 
-    // ── Public accessors (for backward compat with PlayerGuard etc) ──
-    public bool IsGrounded       => state.isGrounded;
-    public bool IsDashing        => state.isDashing;
-    public bool IsBlocking       => state.isBlocking;
-    public bool IsCrouchBlocking => state.isCrouchBlocking;
+    // ── Public accessors ──
+    public bool IsGrounded          => state.isGrounded;
+    public bool IsDashing           => state.isDashing;
+    public bool IsBlocking          => state.isBlocking;
+    public bool IsCrouchBlocking    => state.isCrouchBlocking;
     public bool IsVerticalAttacking => state.isVerticalAttacking;
     public Collider2D GroundCollider => state.groundCollider;
 
@@ -129,12 +129,12 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!hasFocus)
         {
-            state.moveInput  = Vector2.zero;
+            state.moveInput   = Vector2.zero;
             state.jumpPressed = false;
             state.jumpHeld    = false;
             state.crouchHeld  = false;
-            prevRightHeld = false;
-            prevLeftHeld  = false;
+            prevRightHeld     = false;
+            prevLeftHeld      = false;
         }
     }
 
@@ -163,8 +163,6 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckGrounded();
 
-        state.isDashing = state.isDashing; // updated in HandleDash
-
         if (dashCooldownRemaining > 0f)
             dashCooldownRemaining = Mathf.Max(0f, dashCooldownRemaining - Time.fixedDeltaTime);
 
@@ -173,9 +171,7 @@ public class PlayerMovement : MonoBehaviour
         HandleJump();
         ApplyBetterGravity();
 
-        // Write velocity to state for animator
-        state.velocity = rb.linearVelocity;
-
+        state.velocity    = rb.linearVelocity;
         state.jumpPressed = false;
     }
 
@@ -214,7 +210,7 @@ public class PlayerMovement : MonoBehaviour
 
         dashTimeRemaining -= Time.fixedDeltaTime;
 
-        float rawX = state.moveInput.x;
+        float rawX        = state.moveInput.x;
         bool stillHolding = (dashDirection > 0f && rawX > 0.1f) ||
                             (dashDirection < 0f && rawX < -0.1f);
 
@@ -260,9 +256,9 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        float relY        = rb.linearVelocity.y - state.groundVelocity.y;
-        bool withinGrace  = (Time.time - lastGroundedTime) <= groundedGraceTime;
-        state.isGrounded  = withinGrace && relY <= coyoteGroundedMaxRelativeYSpeed;
+        float relY       = rb.linearVelocity.y - state.groundVelocity.y;
+        bool withinGrace = (Time.time - lastGroundedTime) <= groundedGraceTime;
+        state.isGrounded = withinGrace && relY <= coyoteGroundedMaxRelativeYSpeed;
 
         if (state.isGrounded)
             state.didJump = false;
@@ -335,7 +331,7 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            float newX = Mathf.Lerp(rb.linearVelocity.x, targetX, airControlLerp);
+            float newX     = Mathf.Lerp(rb.linearVelocity.x, targetX, airControlLerp);
             rb.linearVelocity = new Vector2(newX, rb.linearVelocity.y);
         }
 
@@ -366,13 +362,13 @@ public class PlayerMovement : MonoBehaviour
         if (state.crouchHeld) return;
         if (lockMovementDuringAttack && state.isAttacking) return;
 
-        rb.constraints        = RigidbodyConstraints2D.FreezeRotation;
-        rb.linearVelocity     = new Vector2(rb.linearVelocity.x, jumpForce);
-        state.isGrounded      = false;
-        state.didJump         = true;
-        state.groundCollider  = null;
-        state.groundVelocity  = Vector2.zero;
-        state.groundNormal    = Vector2.up;
+        rb.constraints       = RigidbodyConstraints2D.FreezeRotation;
+        rb.linearVelocity    = new Vector2(rb.linearVelocity.x, jumpForce);
+        state.isGrounded     = false;
+        state.didJump        = true;
+        state.groundCollider = null;
+        state.groundVelocity = Vector2.zero;
+        state.groundNormal   = Vector2.up;
     }
 
     private void ApplyBetterGravity()

@@ -22,13 +22,9 @@ public class DashAfterimage : MonoBehaviour
     [Tooltip("Sorting order for ghosts — should be BEHIND player.")]
     public int sortingOrder = -1;
 
-    // ── Private ──────────────────────────────────────────────────────────────
-
     private PlayerMovement playerMovement;
     private SpriteRenderer playerSprite;
-    private bool wasBlocking = false;
 
-    // Pool of reusable ghost objects to avoid GC spikes
     private const int PoolSize = 12;
     private GameObject[] pool;
     private SpriteRenderer[] poolRenderers;
@@ -41,7 +37,6 @@ public class DashAfterimage : MonoBehaviour
     {
         playerMovement = GetComponent<PlayerMovement>();
 
-        // Find the player's main SpriteRenderer (inside Graphics child)
         Transform graphics = transform.Find("Graphics");
         if (graphics != null)
             playerSprite = graphics.GetComponent<SpriteRenderer>();
@@ -59,7 +54,7 @@ public class DashAfterimage : MonoBehaviour
         for (int i = 0; i < PoolSize; i++)
         {
             var go = new GameObject("DashGhost_" + i);
-            go.transform.SetParent(transform.parent); // sibling of player, not child
+            go.transform.SetParent(transform.parent);
             go.SetActive(false);
 
             var sr = go.AddComponent<SpriteRenderer>();
@@ -104,24 +99,19 @@ public class DashAfterimage : MonoBehaviour
     {
         if (playerSprite == null || playerSprite.sprite == null) return;
 
-        // Grab next pool slot
         GameObject ghost = pool[poolIndex];
         SpriteRenderer sr = poolRenderers[poolIndex];
         poolIndex = (poolIndex + 1) % PoolSize;
 
-        // Stop any existing fade on this ghost
-        StopCoroutine("FadeGhost"); // won't error if not running
-
-        // Match player's exact position, scale, and sprite
-        ghost.transform.position = playerSprite.transform.position;
-        ghost.transform.rotation = playerSprite.transform.rotation;
+        ghost.transform.position   = playerSprite.transform.position;
+        ghost.transform.rotation   = playerSprite.transform.rotation;
         ghost.transform.localScale = playerSprite.transform.lossyScale;
 
-        sr.sprite = playerSprite.sprite;
-        sr.flipX = playerSprite.flipX;
+        sr.sprite           = playerSprite.sprite;
+        sr.flipX            = playerSprite.flipX;
         sr.sortingLayerName = playerSprite.sortingLayerName;
-        sr.sortingOrder = playerSprite.sortingOrder - 1;
-        sr.color = new Color(0f, 0f, 0f, startAlpha);
+        sr.sortingOrder     = playerSprite.sortingOrder - 1;
+        sr.color            = new Color(0f, 0f, 0f, startAlpha);
 
         ghost.SetActive(true);
 
@@ -136,16 +126,15 @@ public class DashAfterimage : MonoBehaviour
         {
             if (sr == null) yield break;
 
-            float t = elapsed / fadeDuration;
-            // Ease out — fades quickly at first then slows
+            float t     = elapsed / fadeDuration;
             float alpha = Mathf.Lerp(startAlpha, 0f, Mathf.Pow(t, 0.6f));
-            sr.color = new Color(0f, 0f, 0f, alpha);
+            sr.color    = new Color(0f, 0f, 0f, alpha);
 
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        if (sr != null) sr.color = new Color(0f, 0f, 0f, 0f);
+        if (sr != null)    sr.color = new Color(0f, 0f, 0f, 0f);
         if (ghost != null) ghost.SetActive(false);
     }
 }

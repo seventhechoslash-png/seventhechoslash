@@ -1,7 +1,8 @@
 // ============================================================
-//  DreamWindVFX.cs  –  Seventh Echo  (v4)
+//  DreamWindVFX.cs  -  Seventh Echo  (v5)
 //  3 layers: thin cyan streaks + tiny dot sparkles + slow motes
 //  No billboard particles = no squares ever.
+//  Fix: Stop particle systems before configuring (Unity 6 requirement)
 // ============================================================
 using UnityEngine;
 
@@ -38,7 +39,6 @@ public class DreamWindVFX : MonoBehaviour
     private float _gustTimer, _nextGust, _gustCur, _gustTarget;
     private bool  _gustActive;
 
-    // cyan-white streaks, soft lavender motes, bright lavender sparkles
     static readonly Color CStreak = new Color(0.75f, 0.92f, 1.00f);
     static readonly Color CMote   = new Color(0.80f, 0.70f, 1.00f);
     static readonly Color CSpark  = new Color(0.85f, 0.75f, 1.00f);
@@ -47,7 +47,6 @@ public class DreamWindVFX : MonoBehaviour
     const float AMote   = 1.00f;
     const float ASpark  = 1.00f;
 
-    // ─────────────────────────────────────────────────────────
     void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -87,16 +86,19 @@ public class DreamWindVFX : MonoBehaviour
     }
 
     // ══ LAYER 1 — WIND STREAKS ════════════════════════════════
-    // Thin cyan-white horizontal lines. Stretch mode = never squares.
     void BuildStreaks()
     {
         _streaks = Make("WindStreaks");
+
+        // CRITICAL: Stop before configuring — Unity 6 requirement
+        _streaks.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
         var m = _streaks.main;
         m.duration        = 5f;
         m.loop            = true;
         m.startLifetime   = MM(0.3f, 1.8f);
         m.startSpeed      = MM(5f, 18f);
-        m.startSize       = MM(0.008f, 0.04f);   // very thin
+        m.startSize       = MM(0.008f, 0.04f);
         m.startColor      = AC(CStreak, AStreak);
         m.simulationSpace = ParticleSystemSimulationSpace.World;
         m.maxParticles    = 280;
@@ -139,10 +141,13 @@ public class DreamWindVFX : MonoBehaviour
     }
 
     // ══ LAYER 2 — DUST MOTES ══════════════════════════════════
-    // Tiny slow drifting specks. Stretch at near-zero speed = tiny dots.
     void BuildMotes()
     {
         _motes = Make("DustMotes");
+
+        // CRITICAL: Stop before configuring — Unity 6 requirement
+        _motes.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
         var m = _motes.main;
         m.duration        = 5f;
         m.loop            = true;
@@ -187,10 +192,13 @@ public class DreamWindVFX : MonoBehaviour
     }
 
     // ══ LAYER 3 — SPARKLES ════════════════════════════════════
-    // Same as motes but brighter, slightly faster — twinkling feel.
     void BuildSparkles()
     {
         _sparkles = Make("Sparkles");
+
+        // CRITICAL: Stop before configuring — Unity 6 requirement
+        _sparkles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
         var m = _sparkles.main;
         m.duration        = 5f;
         m.loop            = true;
@@ -214,7 +222,6 @@ public class DreamWindVFX : MonoBehaviour
         _sparklesVel.space   = ParticleSystemSimulationSpace.World;
         SV(_sparklesVel, -0.3f, -1.2f, -0.15f, 0.25f);
 
-        // Sparkles flicker — quick fade in/out
         AlphaLife(_sparkles, CSpark, new[]{0f,0.15f,0.5f,0.85f,1f},
                                       new[]{0f,1f,   0.6f,1f,   0f});
 
@@ -235,7 +242,7 @@ public class DreamWindVFX : MonoBehaviour
 
         var r = _sparkles.GetComponent<ParticleSystemRenderer>();
         r.renderMode    = ParticleSystemRenderMode.Stretch;
-        r.velocityScale = 0.02f;   // near zero = tiny dot
+        r.velocityScale = 0.02f;
         r.lengthScale   = 1.0f;
         r.sortingOrder  = 1;
         r.material      = MakeMat(CSpark);
@@ -262,8 +269,9 @@ public class DreamWindVFX : MonoBehaviour
         _gustCur = Mathf.Lerp(_gustCur, _gustTarget, Time.deltaTime * (_gustActive ? 9f : 4f));
         if (_gustActive && _gustTimer >= _nextGust + gustDuration)
         {
-            _gustActive=false; _gustTarget=0f;
-            _nextGust = _gustTimer + Random.Range(gustIntervalMin, gustIntervalMax);
+            _gustActive  = false;
+            _gustTarget  = 0f;
+            _nextGust    = _gustTimer + Random.Range(gustIntervalMin, gustIntervalMax);
         }
     }
 
@@ -285,8 +293,9 @@ public class DreamWindVFX : MonoBehaviour
 
     void SetPS(ParticleSystem ps, Color c, float a)
     {
-        if (ps==null) return;
-        var main = ps.main; main.startColor = AC(c, a);
+        if (ps == null) return;
+        var main = ps.main;
+        main.startColor = AC(c, a);
     }
 
     // ══ PUBLIC ════════════════════════════════════════════════
@@ -316,7 +325,7 @@ public class DreamWindVFX : MonoBehaviour
                    float xMin, float xMax, float yMin, float yMax)
     {
         var z = new ParticleSystem.MinMaxCurve(0f, 0f);
-        v.x=z; v.y=z; v.z=z;
+        v.x = z; v.y = z; v.z = z;
         v.x = new ParticleSystem.MinMaxCurve(xMin, xMax);
         v.y = new ParticleSystem.MinMaxCurve(yMin, yMax);
         v.z = new ParticleSystem.MinMaxCurve(0f,   0f);
@@ -339,11 +348,8 @@ public class DreamWindVFX : MonoBehaviour
         mod.color = new ParticleSystem.MinMaxGradient(g);
     }
 
-    // Creates a material with a procedural round soft-circle texture
-    // so particles always look like dots — never squares.
     Material MakeMat(Color tint)
     {
-        // 32x32 soft circle texture baked at runtime
         int size = 32;
         var tex  = new Texture2D(size, size, TextureFormat.RGBA32, false);
         float half = size * 0.5f;
@@ -354,7 +360,7 @@ public class DreamWindVFX : MonoBehaviour
             float dy   = (y - half) / half;
             float dist = Mathf.Sqrt(dx*dx + dy*dy);
             float a    = Mathf.Clamp01(1f - dist);
-            a          = a * a;   // smooth falloff
+            a          = a * a;
             tex.SetPixel(x, y, new Color(1f, 1f, 1f, a));
         }
         tex.Apply();
@@ -364,13 +370,13 @@ public class DreamWindVFX : MonoBehaviour
                  ?? Shader.Find("Sprites/Default");
 
         var mat = new Material(sh);
-        if (mat.HasProperty("_BaseMap"))    mat.SetTexture("_BaseMap",    tex);
-        if (mat.HasProperty("_MainTex"))    mat.SetTexture("_MainTex",    tex);
-        if (mat.HasProperty("_Surface"))    mat.SetFloat("_Surface",      1f);
-        if (mat.HasProperty("_SrcBlend"))   mat.SetFloat("_SrcBlend",     (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        if (mat.HasProperty("_DstBlend"))   mat.SetFloat("_DstBlend",     (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        mat.color        = new Color(tint.r, tint.g, tint.b, 1f);
-        mat.renderQueue  = 3000;
+        if (mat.HasProperty("_BaseMap"))  mat.SetTexture("_BaseMap",  tex);
+        if (mat.HasProperty("_MainTex"))  mat.SetTexture("_MainTex",  tex);
+        if (mat.HasProperty("_Surface"))  mat.SetFloat("_Surface",    1f);
+        if (mat.HasProperty("_SrcBlend")) mat.SetFloat("_SrcBlend",   (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        if (mat.HasProperty("_DstBlend")) mat.SetFloat("_DstBlend",   (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        mat.color       = new Color(tint.r, tint.g, tint.b, 1f);
+        mat.renderQueue = 3000;
         return mat;
     }
 }

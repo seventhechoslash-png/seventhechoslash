@@ -19,6 +19,10 @@ public class ProwlerAI : MonoBehaviour
     public float idleDuration = 1f;
     public int damage = 15;
 
+    [Header("Vertical Limit")]
+    [Tooltip("Player must be within this vertical distance of the Prowler sprite to be attacked. Stops attacks when player is on a platform above/below.")]
+    public float maxVerticalDistance = 4f;
+
     [Header("References")]
     public Transform player;
     public Transform graphics;
@@ -30,7 +34,7 @@ public class ProwlerAI : MonoBehaviour
     private Rigidbody2D rb;
     private bool isDead = false;
     private float lastAttackTime = -99f;
-    private Vector3 patrolOrigin;
+    private float patrolOriginX;
     private float patrolDir = 1f;
     private bool attackRunning = false;
 
@@ -40,7 +44,6 @@ public class ProwlerAI : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        patrolOrigin = transform.position;
 
         if (graphics == null) graphics = transform.Find("Graphics");
         if (animator == null && graphics != null)
@@ -59,26 +62,36 @@ public class ProwlerAI : MonoBehaviour
             int idx = LayerMask.NameToLayer("Ground");
             if (idx >= 0) groundLayer = 1 << idx;
         }
+
+        patrolOriginX = SpriteX();
     }
+
+    // Sprite world position (what you actually see), not the offset root
+    float SpriteX() => graphics != null ? graphics.position.x : transform.position.x;
+    float SpriteY() => graphics != null ? graphics.position.y : transform.position.y;
 
     void Update()
     {
         if (isDead || player == null) return;
         if (attackRunning) return;
 
-        float distX = Mathf.Abs(transform.position.x - player.position.x);
+        float distX = Mathf.Abs(SpriteX() - player.position.x);
+        float distY = Mathf.Abs(SpriteY() - player.position.y);
 
-        if (distX <= attackRange && Time.time >= lastAttackTime + attackCooldown)
+        // Player must be horizontally close AND on roughly the same vertical level
+        bool sameLevel = distY <= maxVerticalDistance;
+
+        if (sameLevel && distX <= attackRange && Time.time >= lastAttackTime + attackCooldown)
         {
             state = State.Attack;
             StartCoroutine(AttackRoutine());
         }
-        else if (distX <= attackRange)
+        else if (sameLevel && distX <= attackRange)
         {
             state = State.Idle;
             FaceTarget(player.position.x);
         }
-        else if (distX <= detectionRange)
+        else if (sameLevel && distX <= detectionRange)
         {
             state = State.Chase;
         }
@@ -98,19 +111,16 @@ public class ProwlerAI : MonoBehaviour
         switch (state)
         {
             case State.Patrol:
-                // Unlock X for movement
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
                 DoPatrol();
                 break;
 
             case State.Chase:
-                // Unlock X for movement
                 rb.constraints = RigidbodyConstraints2D.FreezeRotation;
                 DoChase();
                 break;
 
             case State.Idle:
-                // FREEZE X — player cannot push the Prowler while it's idle/waiting
                 rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
                 rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
                 break;
@@ -118,7 +128,6 @@ public class ProwlerAI : MonoBehaviour
             case State.Attack:
                 if (!attackRunning)
                 {
-                    // Freeze if attack coroutine hasn't started yet
                     rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
                     rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
                 }
@@ -131,7 +140,6 @@ public class ProwlerAI : MonoBehaviour
         attackRunning = true;
         lastAttackTime = Time.time;
 
-        // Freeze during windup
         rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
         rb.linearVelocity = Vector2.zero;
         FaceTarget(player.position.x);
@@ -147,10 +155,9 @@ public class ProwlerAI : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
 
-        // Unlock X for leap
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
-        float leapDir = player.position.x > transform.position.x ? 1f : -1f;
+        float leapDir = player.position.x > SpriteX() ? 1f : -1f;
         float timer = 0f;
         bool hitDealt = false;
 
@@ -160,8 +167,11 @@ public class ProwlerAI : MonoBehaviour
 
             if (!hitDealt)
             {
-                float dx = Mathf.Abs(transform.position.x - player.position.x);
-                if (dx < attackRange * 0.75f)
+                float dx = Mathf.Abs(SpriteX() - player.position.x);
+                float dy = Mathf.Abs(SpriteY() - player.position.y);
+
+                // Must be close horizontally AND vertically to land the hit
+                if (dx < attackRange * 0.75f && dy <= maxVerticalDistance)
                 {
                     PlayerGuard guard = player.GetComponent<PlayerGuard>();
                     bool blocked = guard != null && guard.TryBlockDamage(player.position);
@@ -170,7 +180,7 @@ public class ProwlerAI : MonoBehaviour
                         PlayerHealth ph = player.GetComponent<PlayerHealth>();
                         if (ph != null)
                         {
-                            Vector2 hitDir = (player.position - transform.position).normalized;
+                            Vector2 hitDir = new Vector2(leapDir, 0f);
                             ph.TakeDamage(damage, hitDir);
                         }
                     }
@@ -182,13 +192,11 @@ public class ProwlerAI : MonoBehaviour
             yield return null;
         }
 
-        // Hard stop + freeze after leap
         rb.constraints = RigidbodyConstraints2D.FreezePositionX | RigidbodyConstraints2D.FreezeRotation;
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
         yield return new WaitForSeconds(0.2f);
 
-        // Idle
         state = State.Idle;
         if (animator != null)
         {
@@ -198,7 +206,6 @@ public class ProwlerAI : MonoBehaviour
 
         yield return new WaitForSeconds(idleDuration);
 
-        // Back to chase — unlock X
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         if (animator != null)
@@ -214,17 +221,17 @@ public class ProwlerAI : MonoBehaviour
 
     void DoPatrol()
     {
-        float distFromOrigin = transform.position.x - patrolOrigin.x;
+        float distFromOrigin = SpriteX() - patrolOriginX;
         if (distFromOrigin >= patrolDistance)  patrolDir = -1f;
         if (distFromOrigin <= -patrolDistance) patrolDir =  1f;
 
         rb.linearVelocity = new Vector2(patrolDir * walkSpeed, rb.linearVelocity.y);
-        FaceTarget(transform.position.x + patrolDir);
+        FaceTarget(SpriteX() + patrolDir);
     }
 
     void DoChase()
     {
-        float dir = player.position.x > transform.position.x ? 1f : -1f;
+        float dir = player.position.x > SpriteX() ? 1f : -1f;
         rb.linearVelocity = new Vector2(dir * chaseSpeed, rb.linearVelocity.y);
         FaceTarget(player.position.x);
     }
@@ -232,7 +239,7 @@ public class ProwlerAI : MonoBehaviour
     void FaceTarget(float targetX)
     {
         if (graphics == null) return;
-        float dir = targetX - transform.position.x;
+        float dir = targetX - SpriteX();
         if (Mathf.Abs(dir) < 0.01f) return;
         Vector3 s = graphics.localScale;
         s.x = Mathf.Abs(s.x) * (dir > 0 ? 1f : -1f);
@@ -255,13 +262,16 @@ public class ProwlerAI : MonoBehaviour
 
     void OnDrawGizmosSelected()
     {
+        Vector3 c = graphics != null ? graphics.position : transform.position;
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, detectionRange);
+        Gizmos.DrawWireSphere(c, detectionRange);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawLine(
-            transform.position + Vector3.left  * patrolDistance,
-            transform.position + Vector3.right * patrolDistance);
+        Gizmos.DrawWireSphere(c, attackRange);
+        // Vertical limit lines
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(c + Vector3.up * maxVerticalDistance + Vector3.left * 5f,
+                        c + Vector3.up * maxVerticalDistance + Vector3.right * 5f);
+        Gizmos.DrawLine(c + Vector3.down * maxVerticalDistance + Vector3.left * 5f,
+                        c + Vector3.down * maxVerticalDistance + Vector3.right * 5f);
     }
 }
