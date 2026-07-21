@@ -246,16 +246,22 @@ public class ProwlerAI : MonoBehaviour
         graphics.localScale = s;
     }
 
+    // Fallback when no cut type provided
     public void TakeDamage()
+    {
+        TakeDamage(EnemyDeathEffect.CutType.Horizontal);
+    }
+
+    public void TakeDamage(EnemyDeathEffect.CutType cut)
     {
         if (isDead) return;
         isDead = true;
         StopAllCoroutines();
         rb.linearVelocity = Vector2.zero;
 
-        ProwlerDeathEffect effect = GetComponent<ProwlerDeathEffect>();
+        EnemyDeathEffect effect = GetComponent<EnemyDeathEffect>();
         if (effect != null)
-            effect.PlayDeathEffect();
+            effect.PlayDeath(cut);
         else
             Destroy(gameObject);
     }

@@ -2,16 +2,22 @@ using UnityEngine;
 
 public class StalkerHealth : MonoBehaviour
 {
+    // Default cut type when killed without a specified slash (fallback)
     public void TakeDamage()
     {
-        Die();
+        TakeDamage(EnemyDeathEffect.CutType.Horizontal);
     }
 
-    private void Die()
+    public void TakeDamage(EnemyDeathEffect.CutType cut)
     {
-        StalkerDeathEffect effect = GetComponent<StalkerDeathEffect>();
+        Die(cut);
+    }
+
+    private void Die(EnemyDeathEffect.CutType cut)
+    {
+        EnemyDeathEffect effect = GetComponent<EnemyDeathEffect>();
         if (effect != null)
-            effect.PlayDeathEffect();
+            effect.PlayDeath(cut);
         else
             Destroy(gameObject);
     }
