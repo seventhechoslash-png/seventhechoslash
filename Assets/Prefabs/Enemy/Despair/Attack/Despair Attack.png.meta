@@ -1,0 +1,364 @@
+fileFormatVersion: 2
+guid: 471380aaa12d8db4eb7fc597d9fa6f91
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4695545555196409366
+    second: Despair Attack_0
+  - first:
+      213: -8736719532281352291
+    second: Despair Attack_1
+  - first:
+      213: 5932152088573645836
+    second: Despair Attack_2
+  - first:
+      213: -2915937764870940073
+    second: Despair Attack_3
+  - first:
+      213: 96453588784758769
+    second: Despair Attack_4
+  - first:
+      213: 7715808303759968547
+    second: Despair Attack_5
+  - first:
+      213: 8057460609583516638
+    second: Despair Attack_6
+  - first:
+      213: 4759600248780706134
+    second: Despair Attack_7
+  - first:
+      213: -3738964756724795491
+    second: Despair Attack_8
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 9
+  spritePivot: {x: 0.4968566, y: 0.5173203}
+  spritePixelsToUnits: 26
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Despair Attack_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 586
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.4968566, y: 0.51732033}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ae98ad3123216deb0800000000000000
+      internalID: -4695545555196409366
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_1
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 585
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.4968566, y: 0.5173203}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d9f2720efdfe0c680800000000000000
+      internalID: -8736719532281352291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_2
+      rect:
+        serializedVersion: 2
+        x: 805
+        y: 594
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.47283718, y: 0.4696911}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c04160905ec335250800000000000000
+      internalID: 5932152088573645836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_3
+      rect:
+        serializedVersion: 2
+        x: 1
+        y: 311
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.48618126, y: 0.48268083}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 75a98b95d028887d0800000000000000
+      internalID: -2915937764870940073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_4
+      rect:
+        serializedVersion: 2
+        x: 415
+        y: 317
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.41679114, y: 0.478351}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ffb3d8270ca65100800000000000000
+      internalID: 96453588784758769
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_5
+      rect:
+        serializedVersion: 2
+        x: 821
+        y: 320
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.3554077, y: 0.46969098}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3294f9ca5ce041b60800000000000000
+      internalID: 7715808303759968547
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_6
+      rect:
+        serializedVersion: 2
+        x: 19
+        y: 35
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.40878472, y: 0.46536085}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: edb8de1fbb9d1df60800000000000000
+      internalID: 8057460609583516638
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_7
+      rect:
+        serializedVersion: 2
+        x: 418
+        y: 33
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.3634144, y: 0.46969092}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6515f65753f7d0240800000000000000
+      internalID: 4759600248780706134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Despair Attack_8
+      rect:
+        serializedVersion: 2
+        x: 812
+        y: 29
+        width: 391
+        height: 241
+      alignment: 9
+      pivot: {x: 0.42479783, y: 0.49567062}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d97b6b71d578c1cc0800000000000000
+      internalID: -3738964756724795491
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: b648c4d5c9f90d443ba6eab8228a5671
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Despair Attack_0: -4695545555196409366
+      Despair Attack_1: -8736719532281352291
+      Despair Attack_2: 5932152088573645836
+      Despair Attack_3: -2915937764870940073
+      Despair Attack_4: 96453588784758769
+      Despair Attack_5: 7715808303759968547
+      Despair Attack_6: 8057460609583516638
+      Despair Attack_7: 4759600248780706134
+      Despair Attack_8: -3738964756724795491
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

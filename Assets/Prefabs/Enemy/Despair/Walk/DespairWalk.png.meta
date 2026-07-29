@@ -1,0 +1,442 @@
+fileFormatVersion: 2
+guid: 61b54958073be064cb4ef5e62dfac494
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6146546940574844718
+    second: DespairWalk_0
+  - first:
+      213: 79344978778031080
+    second: DespairWalk_1
+  - first:
+      213: 159856602880650983
+    second: DespairWalk_2
+  - first:
+      213: 7172480656351662529
+    second: DespairWalk_3
+  - first:
+      213: -1842130744249770181
+    second: DespairWalk_4
+  - first:
+      213: 8066361697438692800
+    second: DespairWalk_5
+  - first:
+      213: -1535583799120312134
+    second: DespairWalk_6
+  - first:
+      213: 8882092784089900017
+    second: DespairWalk_7
+  - first:
+      213: 9148766819962570442
+    second: DespairWalk_8
+  - first:
+      213: 6626771180443346448
+    second: DespairWalk_9
+  - first:
+      213: -6514348882106445836
+    second: DespairWalk_10
+  - first:
+      213: -4789110195018296731
+    second: DespairWalk_11
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: DespairWalk_0
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 2062
+        width: 679
+        height: 934
+      alignment: 9
+      pivot: {x: 0.46804854, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e274a3c60ebec4550800000000000000
+      internalID: 6146546940574844718
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_1
+      rect:
+        serializedVersion: 2
+        x: 797
+        y: 2062
+        width: 649
+        height: 934
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8e386ca76d3e91100800000000000000
+      internalID: 79344978778031080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_2
+      rect:
+        serializedVersion: 2
+        x: 1565
+        y: 2062
+        width: 617
+        height: 934
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eea3bdbbbce73200800000000000000
+      internalID: 159856602880650983
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_3
+      rect:
+        serializedVersion: 2
+        x: 2321
+        y: 2062
+        width: 604
+        height: 934
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c19330d725c98360800000000000000
+      internalID: 7172480656351662529
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_4
+      rect:
+        serializedVersion: 2
+        x: 73
+        y: 1059
+        width: 605
+        height: 933
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3f9a2f19df6f66e0800000000000000
+      internalID: -1842130744249770181
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_5
+      rect:
+        serializedVersion: 2
+        x: 814
+        y: 1059
+        width: 625
+        height: 934
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c576a5f93971ff60800000000000000
+      internalID: 8066361697438692800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_6
+      rect:
+        serializedVersion: 2
+        x: 1566
+        y: 1063
+        width: 625
+        height: 934
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab8c69aaba280bae0800000000000000
+      internalID: -1535583799120312134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_7
+      rect:
+        serializedVersion: 2
+        x: 2309
+        y: 1059
+        width: 643
+        height: 932
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1f32db9e358834b70800000000000000
+      internalID: 8882092784089900017
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_8
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 62
+        width: 612
+        height: 931
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac6cfb453f2f6fe70800000000000000
+      internalID: 9148766819962570442
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_9
+      rect:
+        serializedVersion: 2
+        x: 825
+        y: 62
+        width: 610
+        height: 935
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0162f1a474507fb50800000000000000
+      internalID: 6626771180443346448
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_10
+      rect:
+        serializedVersion: 2
+        x: 1562
+        y: 62
+        width: 623
+        height: 935
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ff051bc4326895a0800000000000000
+      internalID: -6514348882106445836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: DespairWalk_11
+      rect:
+        serializedVersion: 2
+        x: 2299
+        y: 62
+        width: 655
+        height: 932
+      alignment: 9
+      pivot: {x: 0.4680485, y: 0.5295627}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5629bb3c6a9a98db0800000000000000
+      internalID: -4789110195018296731
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      DespairWalk_0: 6146546940574844718
+      DespairWalk_1: 79344978778031080
+      DespairWalk_10: -6514348882106445836
+      DespairWalk_11: -4789110195018296731
+      DespairWalk_2: 159856602880650983
+      DespairWalk_3: 7172480656351662529
+      DespairWalk_4: -1842130744249770181
+      DespairWalk_5: 8066361697438692800
+      DespairWalk_6: -1535583799120312134
+      DespairWalk_7: 8882092784089900017
+      DespairWalk_8: 9148766819962570442
+      DespairWalk_9: 6626771180443346448
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

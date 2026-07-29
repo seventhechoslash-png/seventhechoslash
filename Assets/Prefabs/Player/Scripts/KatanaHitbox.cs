@@ -14,6 +14,7 @@ public class KatanaHitbox : MonoBehaviour
 
     private Collider2D hitCollider;
     private bool hasFrozenThisSwing = false;
+    private bool hasHitThisSwing = false;
 
     private void Awake()
     {
@@ -24,7 +25,8 @@ public class KatanaHitbox : MonoBehaviour
 
     public void EnableHitbox()
     {
-        hasFrozenThisSwing = false; // reset at the start of each swing
+        hasFrozenThisSwing = false;
+        hasHitThisSwing = false;
         if (hitCollider != null)
             hitCollider.enabled = true;
     }
@@ -37,6 +39,8 @@ public class KatanaHitbox : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        if (hasHitThisSwing) return;
+
         bool hitSomething = false;
 
         // Stalker
@@ -46,9 +50,10 @@ public class KatanaHitbox : MonoBehaviour
             stalker.TakeDamage(cutType);
             hitSomething = true;
         }
-        else
+
+        // Prowler
+        if (!hitSomething)
         {
-            // Prowler
             ProwlerAI prowler = other.GetComponent<ProwlerAI>();
             if (prowler != null)
             {
@@ -57,16 +62,34 @@ public class KatanaHitbox : MonoBehaviour
             }
         }
 
-        // Trigger the hit pause on impact
+        // Despair
+        if (!hitSomething)
+        {
+            DespairAI despair = other.GetComponent<DespairAI>();
+            if (despair != null)
+            {
+                despair.TakeDamage(cutType);
+                hitSomething = true;
+            }
+        }
+
         if (hitSomething)
+        {
+            hasHitThisSwing = true;
             TriggerHitStop();
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        if (hasHitThisSwing) return;
+        OnTriggerEnter2D(other);
     }
 
     private void TriggerHitStop()
     {
         if (oneFreezePerSwing && hasFrozenThisSwing) return;
         hasFrozenThisSwing = true;
-
         if (HitStop.Instance != null)
             HitStop.Instance.Freeze(hitStopDuration);
     }
