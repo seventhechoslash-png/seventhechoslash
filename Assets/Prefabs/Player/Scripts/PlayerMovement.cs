@@ -50,6 +50,14 @@ public class PlayerMovement : MonoBehaviour
     public float dashCooldown = 0.8f;
     public float doubleTapWindow = 0.25f;
 
+    [Header("Dash Jump")]
+    [Tooltip("Dash keeps running through the jump as long as the same direction is held.")]
+    public bool dashContinuesThroughJump = true;
+    [Tooltip("1 = forward jump speed is EXACTLY dash speed. Lower/raise only to tune feel.")]
+    public float airDashSpeedMultiplier = 1f;
+    [Tooltip("If false, walking/dashing off a ledge (no jump) cancels the dash like before.")]
+    public bool dashContinuesOffLedge = false;
+
     [Header("Debug")]
     public bool debugGround = false;
 
@@ -73,6 +81,7 @@ public class PlayerMovement : MonoBehaviour
     // ── Public accessors ──
     public bool IsGrounded          => state.isGrounded;
     public bool IsDashing           => state.isDashing;
+    public bool IsAirDashing        => state.isDashing && !state.isGrounded;
     public bool IsBlocking          => state.isBlocking;
     public bool IsCrouchBlocking    => state.isCrouchBlocking;
     public bool IsVerticalAttacking => state.isVerticalAttacking;
@@ -190,6 +199,14 @@ public class PlayerMovement : MonoBehaviour
         dashCooldownRemaining = dashCooldown;
     }
 
+    /// <summary>True while the raw move input is still pushing in the dash direction.</summary>
+    private bool HoldingDashDirection()
+    {
+        float rawX = state.moveInput.x;
+        return (dashDirection > 0f && rawX >  0.1f) ||
+               (dashDirection < 0f && rawX < -0.1f);
+    }
+
     private void HandleDash()
     {
         if (!state.isDashing) return;
@@ -202,18 +219,30 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
+        bool stillHolding = HoldingDashDirection();
+        dashTimeRemaining -= Time.fixedDeltaTime;
+
+        // ── Airborne part of the dash (dash jump) ──
         if (!state.isGrounded)
         {
-            state.isDashing = false;
+            bool allowedInAir = dashContinuesThroughJump &&
+                                (state.didJump || dashContinuesOffLedge);
+
+            if (!allowedInAir || (!stillHolding && dashTimeRemaining <= 0f))
+            {
+                state.isDashing = false;
+                return;
+            }
+
+            // Lock X to dash speed, leave Y alone so the jump arc is untouched.
+            rb.linearVelocity = new Vector2(
+                dashDirection * dashSpeed * airDashSpeedMultiplier,
+                rb.linearVelocity.y
+            );
             return;
         }
 
-        dashTimeRemaining -= Time.fixedDeltaTime;
-
-        float rawX        = state.moveInput.x;
-        bool stillHolding = (dashDirection > 0f && rawX > 0.1f) ||
-                            (dashDirection < 0f && rawX < -0.1f);
-
+        // ── Grounded dash (unchanged) ──
         if (dashTimeRemaining > 0f || stillHolding)
             rb.linearVelocity = new Vector2(dashDirection * dashSpeed, 0f);
         else
@@ -348,12 +377,6 @@ public class PlayerMovement : MonoBehaviour
         if (!state.jumpPressed) return;
         if (state.isBlocking || state.isCrouchBlocking) return;
 
-        if (state.isDashing)
-        {
-            state.isDashing   = false;
-            dashTimeRemaining = 0f;
-        }
-
         float relativeY   = rb.linearVelocity.y - state.groundVelocity.y;
         bool withinGrace  = (Time.time - lastGroundedTime) <= groundedGraceTime;
         bool canUseCoyote = withinGrace && relativeY <= coyoteGroundedMaxRelativeYSpeed;
@@ -362,8 +385,26 @@ public class PlayerMovement : MonoBehaviour
         if (state.crouchHeld) return;
         if (lockMovementDuringAttack && state.isAttacking) return;
 
-        rb.constraints       = RigidbodyConstraints2D.FreezeRotation;
-        rb.linearVelocity    = new Vector2(rb.linearVelocity.x, jumpForce);
+        // ── The jump is definitely happening from here on ──
+
+        bool keepDash = state.isDashing &&
+                        dashContinuesThroughJump &&
+                        HoldingDashDirection();
+
+        if (state.isDashing && !keepDash)
+        {
+            state.isDashing   = false;
+            dashTimeRemaining = 0f;
+        }
+
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        // Dash jump launches at dash speed. Normal jump keeps whatever run speed it had.
+        float launchX = keepDash
+            ? dashDirection * dashSpeed * airDashSpeedMultiplier
+            : rb.linearVelocity.x;
+
+        rb.linearVelocity    = new Vector2(launchX, jumpForce);
         state.isGrounded     = false;
         state.didJump        = true;
         state.groundCollider = null;
@@ -373,7 +414,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyBetterGravity()
     {
-        if (state.isDashing) return;
+        // Grounded dash still skips the gravity shaping (original behavior).
+        // An air dash must NOT skip it, or the jump arc floats.
+        if (state.isDashing && state.isGrounded) return;
 
         if (rb.linearVelocity.y < 0f)
             rb.linearVelocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1f) * Time.fixedDeltaTime;
