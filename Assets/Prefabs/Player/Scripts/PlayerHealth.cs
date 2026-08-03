@@ -11,6 +11,15 @@ public class PlayerHealth : MonoBehaviour
     public float knockbackForce = 10f;
     public float knockbackDuration = 0.15f;
 
+    [Header("Guard Slide")]
+    [Tooltip("How far the player slides back when blocking an attack.")]
+    public float guardSlideForce = 7f;
+    [Tooltip("How long the guard slide lasts.")]
+    public float guardSlideDuration = 0.2f;
+    [Tooltip("Damage reduction while blocking (0 = no damage, 0.5 = half damage, 1 = full damage).")]
+    [Range(0f, 1f)]
+    public float blockDamageReduction = 0f;
+
     [Header("Flash Effect")]
     public SpriteRenderer spriteRenderer;
     public float flashDuration = 0.1f;
@@ -21,6 +30,7 @@ public class PlayerHealth : MonoBehaviour
 
     private Rigidbody2D rb;
     private Animator animator;
+    private PlayerState state;
     private bool isKnocked;
     private bool isDead;
 
@@ -29,6 +39,7 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = maxHealth;
         rb            = GetComponent<Rigidbody2D>();
         animator      = GetComponentInChildren<Animator>();
+        state         = GetComponent<PlayerState>();
 
         if (spriteRenderer == null)
             spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -49,6 +60,36 @@ public class PlayerHealth : MonoBehaviour
         if (isKnocked) return;
         if (isDead) return;
 
+        // ── GUARD SLIDE: blocking any attack ──
+        if (state != null && (state.isBlocking || state.isCrouchBlocking))
+        {
+            // Reduced damage while blocking (default 0 = no damage)
+            int blockedDamage = Mathf.RoundToInt(damage * blockDamageReduction);
+            if (blockedDamage > 0)
+            {
+                currentHealth -= blockedDamage;
+                if (HealthUI.Instance != null)
+                    HealthUI.Instance.UpdateHealth(currentHealth, maxHealth);
+            }
+
+            // Slide backward away from the attacker
+            if (rb != null)
+                StartCoroutine(GuardSlide(hitDirection));
+
+            // Small camera shake on block (lighter than a real hit)
+            if (CameraShake.Instance != null)
+                CameraShake.Instance.Shake(0.08f, 0.1f);
+
+            // Block flash — white instead of red
+            StartCoroutine(BlockFlash());
+
+            if (currentHealth <= 0)
+                Die();
+
+            return; // Don't apply normal damage/knockback/hurt animation
+        }
+
+        // ── NORMAL HIT (not blocking) ──
         currentHealth -= damage;
         Debug.Log("Player Hit! Health: " + currentHealth);
 
@@ -74,25 +115,40 @@ public class PlayerHealth : MonoBehaviour
     {
         if (animator == null) return;
 
-        // Determine if hit came from above or below the chest
-        // hitDirection.y > 0 means enemy hit upward (player was hit from below/middle)
-        // hitDirection.y < 0 means hit came downward (upper body hit like Stalker laser)
-        // We also check the chest world Y as fallback
+        bool isUpperHit = hitDirection.y < 0f;
 
-        bool isUpperHit = hitDirection.y < 0f; // downward force = upper body hit
-
-        // If hitDirection is mostly horizontal (like Prowler leap),
-        // use ChestPoint Y to decide based on enemy position
         if (Mathf.Abs(hitDirection.y) < 0.3f && chestPoint != null)
-        {
-            // Horizontal hit — Prowler is ground level so it's always middle
             isUpperHit = false;
-        }
 
         if (isUpperHit)
             animator.SetTrigger("upperHurt");
         else
             animator.SetTrigger("middleHurt");
+    }
+
+    IEnumerator GuardSlide(Vector2 hitDirection)
+    {
+        isKnocked = true;
+
+        // Slide AWAY from the hit source (opposite of hit direction)
+        float slideDir = hitDirection.x >= 0f ? -1f : 1f;
+
+        rb.linearVelocity = new Vector2(slideDir * guardSlideForce, 0f);
+
+        float elapsed = 0f;
+        while (elapsed < guardSlideDuration)
+        {
+            // Decelerate smoothly over the slide duration
+            float t = elapsed / guardSlideDuration;
+            float speed = Mathf.Lerp(guardSlideForce, 0f, t);
+            rb.linearVelocity = new Vector2(slideDir * speed, rb.linearVelocity.y);
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+        isKnocked = false;
     }
 
     IEnumerator ApplyKnockback(Vector2 dir)
@@ -109,6 +165,14 @@ public class PlayerHealth : MonoBehaviour
         if (spriteRenderer == null) yield break;
         spriteRenderer.color = Color.red;
         yield return new WaitForSeconds(flashDuration);
+        spriteRenderer.color = Color.white;
+    }
+
+    IEnumerator BlockFlash()
+    {
+        if (spriteRenderer == null) yield break;
+        spriteRenderer.color = new Color(0.8f, 0.85f, 1f); // subtle cool white
+        yield return new WaitForSeconds(flashDuration * 0.7f);
         spriteRenderer.color = Color.white;
     }
 

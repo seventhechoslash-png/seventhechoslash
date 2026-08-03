@@ -1632,6 +1632,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   cameraTransform: {fileID: 519420032}
   parallaxMultiplier: 0.65
+  smoothing: 0.85
 --- !u!4 &129847423
 Transform:
   m_ObjectHideFlags: 0
@@ -4439,6 +4440,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   cameraTransform: {fileID: 519420032}
   parallaxMultiplier: 0.4
+  smoothing: 0.95
 --- !u!1 &417717292
 GameObject:
   m_ObjectHideFlags: 0
@@ -5463,7 +5465,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -269.4, y: -111.28401, z: -10}
+  m_LocalPosition: {x: -269.4, y: -134.35037, z: -10}
   m_LocalScale: {x: 0.6, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -7389,7 +7391,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ebabf780f815404797ed84d4596626c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathEffect
-  electrocuteDuration: 0
+  electrocuteDuration: 3
   flickerSpeed: 0.04
   jitterAmount: 0.06
   electricColorA: {r: 0.6, g: 0.85, b: 1, a: 1}
@@ -7398,7 +7400,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -9301,7 +9303,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -9569,7 +9571,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -10063,7 +10065,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -60
+  m_SortingOrder: -65
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 04083641e3d78cc4dbfed6cc216c3677, type: 3}
   m_Color: {r: 0.6415094, g: 0.38430044, b: 0.6326591, a: 0.30980393}
@@ -10342,7 +10344,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -12534,7 +12536,7 @@ Transform:
   m_GameObject: {fileID: 1143491691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -269.4, y: -117.62, z: 0}
+  m_LocalPosition: {x: -269.4, y: -141.4, z: 0}
   m_LocalScale: {x: 1.1137476, y: 1.1836817, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -12575,7 +12577,7 @@ MonoBehaviour:
   noFrictionMaterial: {fileID: 6200000, guid: 355288aa491e71b40aca3277cb8df995, type: 2}
   lockMovementDuringAttack: 1
   lockMovementDuringBlock: 1
-  dashSpeed: 16
+  dashSpeed: 17
   dashMinDuration: 0.3
   dashCooldown: 0.3
   doubleTapWindow: 0.25
@@ -12681,6 +12683,9 @@ MonoBehaviour:
   maxHealth: 100
   knockbackForce: 8
   knockbackDuration: 0.15
+  guardSlideForce: 7
+  guardSlideDuration: 0.2
+  blockDamageReduction: 0
   spriteRenderer: {fileID: 0}
   flashDuration: 0.1
   chestPoint: {fileID: 0}
@@ -13009,7 +13014,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -14726,7 +14731,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -14876,7 +14881,7 @@ Transform:
   m_GameObject: {fileID: 1290960523}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -269.4, y: -111.28401, z: -10}
+  m_LocalPosition: {x: -269.4, y: -135.06401, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -15242,7 +15247,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -17059,7 +17064,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -17144,7 +17149,7 @@ Transform:
   m_GameObject: {fileID: 1466082697}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -285.59, y: -100.1, z: 0}
+  m_LocalPosition: {x: -52.1, y: -67, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -17554,7 +17559,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -19859,7 +19864,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -20026,7 +20031,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -20738,6 +20743,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   cameraTransform: {fileID: 519420032}
   parallaxMultiplier: 0.2
+  smoothing: 0.85
 --- !u!1 &1752691914
 GameObject:
   m_ObjectHideFlags: 0
@@ -22150,7 +22156,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -23706,7 +23712,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ebabf780f815404797ed84d4596626c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyDeathEffect
-  electrocuteDuration: 0
+  electrocuteDuration: 0.3
   flickerSpeed: 0.04
   jitterAmount: 0.06
   electricColorA: {r: 0.6, g: 0.85, b: 1, a: 1}
@@ -23715,7 +23721,7 @@ MonoBehaviour:
   arcColor: {r: 0.7, g: 0.9, b: 1, a: 1}
   blastFlashDuration: 0.12
   blastColor: {r: 0.8, g: 0.95, b: 1, a: 1}
-  shockwaveMaxScale: 5
+  shockwaveMaxScale: 20
   shockwaveDuration: 0.35
   screenFlashIntensity: 0.4
   screenFlashDuration: 0.12
@@ -23727,7 +23733,7 @@ MonoBehaviour:
   ashMaxSize: 0.32
   ashHotColor: {r: 1, g: 0.55, b: 0.15, a: 1}
   ashCoolColor: {r: 0.15, g: 0.15, b: 0.18, a: 1}
-  smolderDuration: 2.5
+  smolderDuration: 5
   smolderPulseSpeed: 6
   groundLayer:
     serializedVersion: 2
@@ -23766,8 +23772,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: -9.843198, y: -16.92662}
-  m_Size: {x: 4.786389, y: 3.2505841}
+  m_Offset: {x: -9.843198, y: -17.139114}
+  m_Size: {x: 4.786389, y: 2.8255985}
   m_Direction: 1
 --- !u!114 &1914580889
 MonoBehaviour:
@@ -23834,8 +23840,8 @@ Transform:
   m_GameObject: {fileID: 1914580886}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -221.4, y: -121.4, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: -221.4, y: -125.79, z: 0}
+  m_LocalScale: {x: 1, y: 0.775, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1160749652}
@@ -24257,6 +24263,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ParallaxLayer
   cameraTransform: {fileID: 519420032}
   parallaxMultiplier: 0.35
+  smoothing: 0.85
 --- !u!4 &1938679752
 Transform:
   m_ObjectHideFlags: 0

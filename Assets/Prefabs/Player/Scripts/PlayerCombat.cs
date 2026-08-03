@@ -76,9 +76,18 @@ public class PlayerCombat : MonoBehaviour
             verticalAttackPressed = false;
             verticalAttackHeld    = false;
             blockHeld             = false;
+            state.isBlocking      = false;
+            state.isCrouchBlocking = false;
             state.isVerticalAttackHolding = false;
             if (animator != null) animator.speed = 1f;
         }
+    }
+
+    // Block state evaluated every frame (Update) for instant response,
+    // not in FixedUpdate which adds up to 20ms delay.
+    private void Update()
+    {
+        UpdateBlockState();
     }
 
     private void FixedUpdate()
@@ -90,18 +99,31 @@ public class PlayerCombat : MonoBehaviour
             state.isAttacking = st.IsName("Attack") || st.IsName("SitAttack") || state.isVerticalAttacking;
         }
 
-        // Standing block: G held, NOT crouching
-        state.isBlocking = blockHeld && state.isGrounded && !state.isAttacking
-                           && !state.isDashing && !state.crouchHeld;
-
-        // Crouch block: G + C held
-        state.isCrouchBlocking = blockHeld && state.crouchHeld && state.isGrounded
-                                  && !state.isAttacking && !state.isDashing;
+        // Block state also refreshed here for physics sync
+        UpdateBlockState();
 
         HandleAttack();
 
         attackPressed         = false;
         verticalAttackPressed = false;
+    }
+
+    private void UpdateBlockState()
+    {
+        // Standing block: G held, NOT crouching
+        // isDashing check removed — OnBlockPerformed cancels dash before we get here
+        state.isBlocking = blockHeld && state.isGrounded
+                           && !state.crouchHeld;
+
+        // Crouch block: G + C held
+        state.isCrouchBlocking = blockHeld && state.crouchHeld && state.isGrounded;
+
+        // Block overrides attack state
+        if (state.isBlocking || state.isCrouchBlocking)
+        {
+            state.isAttacking = false;
+            state.isVerticalAttacking = false;
+        }
     }
 
     private void HandleAttack()
@@ -159,8 +181,31 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    private void OnBlockPerformed(InputAction.CallbackContext ctx) => blockHeld = true;
-    private void OnBlockCanceled(InputAction.CallbackContext ctx)  => blockHeld = false;
+    private void OnBlockPerformed(InputAction.CallbackContext ctx)
+    {
+        blockHeld = true;
+
+        // Cancel dash immediately when block is pressed
+        if (state.isDashing)
+            state.isDashing = false;
+
+        // Cancel any in-progress attack so block takes priority
+        if (state.isAttacking && animator != null)
+        {
+            animator.ResetTrigger(attackTrigger);
+            animator.ResetTrigger(verticalAttackTrigger);
+        }
+
+        // Set blocking immediately — don't wait for next Update/FixedUpdate
+        UpdateBlockState();
+    }
+
+    private void OnBlockCanceled(InputAction.CallbackContext ctx)
+    {
+        blockHeld = false;
+        state.isBlocking = false;
+        state.isCrouchBlocking = false;
+    }
 
     private void OnVerticalAttack(InputAction.CallbackContext ctx)
     {
