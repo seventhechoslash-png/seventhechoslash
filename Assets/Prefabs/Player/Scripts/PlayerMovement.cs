@@ -187,6 +187,7 @@ public class PlayerMovement : MonoBehaviour
     private void TryStartDash(float dir)
     {
         if (state.isDashing) return;
+        if (state.isKnocked) return;
         if (!state.isGrounded) return;
         if (dashCooldownRemaining > 0f) return;
         if (state.crouchHeld) return;
@@ -311,6 +312,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovement()
     {
+        // KNOCKBACK GATE — PlayerHealth owns horizontal velocity while sliding.
+        // Without this line every slide is erased in the same physics step.
+        if (state.isKnocked) return;
+
         if (state.isDashing) return;
 
         if (lockMovementDuringBlock && (state.isBlocking || state.isCrouchBlocking))

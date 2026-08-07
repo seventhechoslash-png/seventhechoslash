@@ -21,6 +21,9 @@ public class PlayerState : MonoBehaviour
     public bool isBlocking;
     public bool isCrouchBlocking;
 
+    // ── Damage State ─────────────────────────────────────────
+    public bool isKnocked;
+
     // ── Ground Info ────────────────────────────────────────────────────────
     public Collider2D groundCollider;
     public Vector2 groundVelocity;

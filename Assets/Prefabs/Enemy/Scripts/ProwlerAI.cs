@@ -174,7 +174,7 @@ public class ProwlerAI : MonoBehaviour
                 if (dx < attackRange * 0.75f && dy <= maxVerticalDistance)
                 {
                     PlayerGuard guard = player.GetComponent<PlayerGuard>();
-                    bool blocked = guard != null && guard.TryBlockDamage(player.position);
+                    bool blocked = guard != null && guard.TryBlockDamage(player.position, gameObject);
                     if (!blocked)
                     {
                         PlayerHealth ph = player.GetComponent<PlayerHealth>();

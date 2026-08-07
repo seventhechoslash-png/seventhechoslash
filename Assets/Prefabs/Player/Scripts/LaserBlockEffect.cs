@@ -8,8 +8,9 @@ using UnityEngine;
 /// </summary>
 public class LaserBlockEffect : MonoBehaviour
 {
-    [Header("Spark Settings")]
-    public Color sparkColor = new Color(1f, 0.95f, 0.7f, 1f);
+    [Header("Spark Settings — BLOCK (silver)")]
+    [Tooltip("Cool silver. Slightly blue-white reads as steel rather than gold.")]
+    public Color sparkColor = new Color(0.82f, 0.87f, 0.95f, 1f);
     [Range(5, 20)]
     public int sparkCount = 12;
     [Range(0.05f, 0.4f)]
@@ -19,8 +20,8 @@ public class LaserBlockEffect : MonoBehaviour
     [Range(0.05f, 0.5f)]
     public float sparkSize = 0.12f;
 
-    [Header("Flash Ring")]
-    public Color flashColor = new Color(1f, 0.98f, 0.8f, 1f);
+    [Header("Flash Ring — BLOCK (silver)")]
+    public Color flashColor = new Color(0.88f, 0.92f, 1f, 1f);
     [Range(0.05f, 0.4f)]
     public float flashDuration = 0.18f;
     [Range(0.3f, 3f)]
@@ -32,10 +33,34 @@ public class LaserBlockEffect : MonoBehaviour
     [Range(0.05f, 0.3f)]
     public float screenFlashDuration = 0.1f;
 
+    [Header("PARRY — bright silver, everything scaled up")]
+    [Tooltip("Near-white with a cold edge. This is the money shot.")]
+    public Color parrySparkColor = new Color(1f, 1f, 1f, 1f);
+    public Color parryFlashColor = new Color(0.96f, 0.98f, 1f, 1f);
+    [Tooltip("Spark count multiplier on a parry.")]
+    [Range(1f, 3f)]
+    public float parrySparkCountMultiplier = 2f;
+    [Tooltip("Spark speed and size multiplier on a parry.")]
+    [Range(1f, 3f)]
+    public float parrySparkForceMultiplier = 1.6f;
+    [Tooltip("Flash ring size multiplier on a parry.")]
+    [Range(1f, 3f)]
+    public float parryRingScaleMultiplier = 1.8f;
+    [Tooltip("Screen flash intensity multiplier on a parry.")]
+    [Range(1f, 3f)]
+    public float parryScreenFlashMultiplier = 2f;
+
     [Header("Audio")]
     public AudioClip blockSoundClip;
     [Range(0f, 1f)]
     public float blockSoundVolume = 0.8f;
+    [Tooltip("Higher, brighter ring for a parry. Falls back to blockSoundClip if empty.")]
+    public AudioClip parrySoundClip;
+    [Range(0f, 1f)]
+    public float parrySoundVolume = 1f;
+    [Tooltip("Pitch applied to the parry sound. Above 1 sounds sharper / more metallic.")]
+    [Range(0.5f, 2f)]
+    public float parrySoundPitch = 1.25f;
 
     // ── Pool ──────────────────────────────────────────────────────────────────
     private const int PoolSize = 20;
@@ -76,45 +101,81 @@ public class LaserBlockEffect : MonoBehaviour
 
     // ── Public API ────────────────────────────────────────────────────────────
 
+    /// <summary>Normal block — small silver spark.</summary>
     public void PlayBlockEffect(Vector2 hitPoint)
+    {
+        Play(hitPoint, false);
+    }
+
+    /// <summary>Successful parry — bright silver burst, everything scaled up.</summary>
+    public void PlayParryEffect(Vector2 hitPoint)
+    {
+        Play(hitPoint, true);
+    }
+
+    private void Play(Vector2 hitPoint, bool isParry)
     {
         transform.position = hitPoint;
 
-        StopAllCoroutines();
-        StartCoroutine(DoSparks(hitPoint));
-        StartCoroutine(DoFlashRing(hitPoint));
-        StartCoroutine(DoScreenFlash());
+        Color sCol = isParry ? parrySparkColor : sparkColor;
+        Color fCol = isParry ? parryFlashColor : flashColor;
 
-        if (blockSoundClip != null)
-            audioSource.PlayOneShot(blockSoundClip, blockSoundVolume);
+        int   count = isParry
+            ? Mathf.RoundToInt(sparkCount * parrySparkCountMultiplier)
+            : sparkCount;
+        float force = isParry ? parrySparkForceMultiplier : 1f;
+        float ring  = isParry ? flashMaxScale * parryRingScaleMultiplier : flashMaxScale;
+        float scr   = isParry
+            ? Mathf.Clamp01(screenFlashIntensity * parryScreenFlashMultiplier)
+            : screenFlashIntensity;
+
+        StopAllCoroutines();
+        StartCoroutine(DoSparks(hitPoint, sCol, count, force));
+        StartCoroutine(DoFlashRing(hitPoint, fCol, ring));
+        StartCoroutine(DoScreenFlash(scr));
+
+        AudioClip clip = isParry
+            ? (parrySoundClip != null ? parrySoundClip : blockSoundClip)
+            : blockSoundClip;
+
+        if (clip != null)
+        {
+            audioSource.pitch = isParry ? parrySoundPitch : 1f;
+            audioSource.PlayOneShot(clip, isParry ? parrySoundVolume : blockSoundVolume);
+        }
     }
 
     // ── Spark burst ───────────────────────────────────────────────────────────
 
-    IEnumerator DoSparks(Vector2 origin)
+    IEnumerator DoSparks(Vector2 origin, Color col, int count, float forceMul)
     {
-        for (int i = 0; i < sparkCount; i++)
+        count = Mathf.Min(count, PoolSize);
+
+        for (int i = 0; i < count; i++)
         {
             GameObject go = sparkPool[poolIndex];
             SpriteRenderer sr = sparkRenderers[poolIndex];
             poolIndex = (poolIndex + 1) % PoolSize;
 
+            float size = sparkSize * forceMul;
+
             go.transform.position = origin;
-            go.transform.localScale = Vector3.one * sparkSize;
-            sr.color = new Color(sparkColor.r, sparkColor.g, sparkColor.b, 1f);
+            go.transform.localScale = Vector3.one * size;
+            sr.color = new Color(col.r, col.g, col.b, 1f);
             go.SetActive(true);
 
             // Random direction — full 360 degrees, weighted upward
             float angle = Random.Range(-160f, -20f); // mostly upward arc
             Vector2 dir = new Vector2(Mathf.Cos(angle * Mathf.Deg2Rad), Mathf.Sin(angle * Mathf.Deg2Rad));
-            float speed = Random.Range(sparkSpeed * 0.5f, sparkSpeed);
+            float speed = Random.Range(sparkSpeed * 0.5f, sparkSpeed) * forceMul;
 
-            StartCoroutine(AnimateSpark(go, sr, dir, speed));
+            StartCoroutine(AnimateSpark(go, sr, dir, speed, col, size));
         }
         yield break;
     }
 
-    IEnumerator AnimateSpark(GameObject go, SpriteRenderer sr, Vector2 direction, float speed)
+    IEnumerator AnimateSpark(GameObject go, SpriteRenderer sr, Vector2 direction,
+                             float speed, Color col, float size)
     {
         float elapsed  = 0f;
         Vector2 pos    = go.transform.position;
@@ -131,21 +192,21 @@ public class LaserBlockEffect : MonoBehaviour
 
             // Shrink and fade
             float alpha = Mathf.Lerp(1f, 0f, Mathf.Pow(t, 0.5f));
-            float scale = Mathf.Lerp(sparkSize, sparkSize * 0.2f, t);
-            sr.color = new Color(sparkColor.r, sparkColor.g, sparkColor.b, alpha);
+            float scale = Mathf.Lerp(size, size * 0.2f, t);
+            sr.color = new Color(col.r, col.g, col.b, alpha);
             go.transform.localScale = Vector3.one * scale;
 
             elapsed += Time.deltaTime;
             yield return null;
         }
 
-        sr.color = new Color(sparkColor.r, sparkColor.g, sparkColor.b, 0f);
+        sr.color = new Color(col.r, col.g, col.b, 0f);
         go.SetActive(false);
     }
 
     // ── Flash ring ────────────────────────────────────────────────────────────
 
-    IEnumerator DoFlashRing(Vector2 origin)
+    IEnumerator DoFlashRing(Vector2 origin, Color col, float maxScale)
     {
         flashRingObj.transform.position = origin;
         flashRingObj.SetActive(true);
@@ -155,13 +216,13 @@ public class LaserBlockEffect : MonoBehaviour
         while (elapsed < flashDuration)
         {
             float t     = elapsed / flashDuration;
-            float scale = Mathf.SmoothStep(0f, flashMaxScale, Mathf.Pow(t, 0.3f));
+            float scale = Mathf.SmoothStep(0f, maxScale, Mathf.Pow(t, 0.3f));
             float alpha = t < 0.15f
                 ? Mathf.Lerp(0f, 1f, t / 0.15f)
                 : Mathf.Lerp(1f, 0f, (t - 0.15f) / 0.85f);
 
             flashRingObj.transform.localScale = Vector3.one * scale;
-            flashRingRenderer.color = new Color(flashColor.r, flashColor.g, flashColor.b, alpha);
+            flashRingRenderer.color = new Color(col.r, col.g, col.b, alpha);
 
             elapsed += Time.deltaTime;
             yield return null;
@@ -172,7 +233,7 @@ public class LaserBlockEffect : MonoBehaviour
 
     // ── Screen flash ──────────────────────────────────────────────────────────
 
-    IEnumerator DoScreenFlash()
+    IEnumerator DoScreenFlash(float intensity)
     {
         if (screenFlashRenderer == null) yield break;
 
@@ -183,8 +244,8 @@ public class LaserBlockEffect : MonoBehaviour
         {
             float t     = elapsed / screenFlashDuration;
             float alpha = t < 0.2f
-                ? Mathf.Lerp(0f, screenFlashIntensity, t / 0.2f)
-                : Mathf.Lerp(screenFlashIntensity, 0f, (t - 0.2f) / 0.8f);
+                ? Mathf.Lerp(0f, intensity, t / 0.2f)
+                : Mathf.Lerp(intensity, 0f, (t - 0.2f) / 0.8f);
             screenFlashRenderer.color = new Color(1f, 1f, 1f, alpha);
             elapsed += Time.deltaTime;
             yield return null;

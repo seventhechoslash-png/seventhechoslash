@@ -221,7 +221,7 @@ public class DespairAI : MonoBehaviour
         if (ph != null)
         {
             Vector2 hitDir = (player.position - transform.position).normalized;
-            ph.TakeDamage((int)attackDamage, hitDir);
+            ph.TakeDamage((int)attackDamage, hitDir, gameObject);
         }
     }
 
