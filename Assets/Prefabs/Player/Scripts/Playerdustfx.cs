@@ -63,6 +63,15 @@ public class PlayerDustFX : MonoBehaviour
     public float dashDustSize     = 0.38f;
     public float dashDustLifetime = 0.45f;
 
+    [Header("1b. Slide Scuff")]
+    [Tooltip("Emit scuff dust during a crouch-slide as well as a dash.")]
+    public bool  emitDustWhileSliding = true;
+    [Tooltip("Faster than dash — a slide grinds the whole body along the ground.")]
+    public float slideEmitInterval  = 0.03f;
+    public int   slideClusterSize   = 3;
+    public float slideDustSize      = 0.46f;
+    public float slideDustLifetime  = 0.55f;
+
     [Header("2. Small Landing")]
     public int   smallPuffCount    = 6;
     public float smallDustSize     = 0.35f;
@@ -125,7 +134,7 @@ public class PlayerDustFX : MonoBehaviour
 
         wasGrounded = grounded;
 
-        HandleDashDust();
+        HandleScuffDust();
     }
 
     // ─────────────────────────────────────────────────────────
@@ -203,13 +212,23 @@ public class PlayerDustFX : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     //  DASH SCUFF
     // ─────────────────────────────────────────────────────────
-    private void HandleDashDust()
+    private void HandleScuffDust()
     {
-        if (!state.isDashing || !state.isGrounded) return;
+        bool sliding = emitDustWhileSliding && state.isSliding;
+        bool dashing = state.isDashing;
+
+        // StartSlide() sets isDashing false — that is why dust vanished on slide.
+        if (!dashing && !sliding) return;
+        if (!state.isGrounded) return;
+
+        float interval = sliding ? slideEmitInterval : dashEmitInterval;
+        int   cluster  = sliding ? slideClusterSize  : dashClusterSize;
+        float size     = sliding ? slideDustSize     : dashDustSize;
+        float life     = sliding ? slideDustLifetime : dashDustLifetime;
 
         dashTimer -= Time.deltaTime;
         if (dashTimer > 0f) return;
-        dashTimer = dashEmitInterval;
+        dashTimer = interval;
 
         // Backward = opposite of actual horizontal velocity.
         // Using velocity (not input) so it works regardless of axis quirks.
@@ -221,17 +240,21 @@ public class PlayerDustFX : MonoBehaviour
 
         // Emit a small cluster of overlapping puffs so the trail
         // reads as flowing scuff dust, not a row of dots.
-        for (int i = 0; i < dashClusterSize; i++)
+        for (int i = 0; i < cluster; i++)
         {
+            // Slide dust hugs the ground and spreads wider than dash heel puffs.
+            float spread = sliding ? 0.55f : 0.30f;
+            float lift   = sliding ? 0.06f : 0.12f;
+
             EmitDust(
                 pos: new Vector3(
-                    feet.x + back * Random.Range(0.05f, 0.30f) * worldScale,
-                    feet.y + Random.Range(0.02f, 0.12f) * worldScale, 0f),
+                    feet.x + back * Random.Range(0.05f, spread) * worldScale,
+                    feet.y + Random.Range(0.01f, lift) * worldScale, 0f),
                 vel: new Vector3(
-                    back * Random.Range(1.2f, 3.2f) * worldScale,
-                    Random.Range(0.3f, 1.3f) * worldScale, 0f),
-                size:     dashDustSize * worldScale * Random.Range(0.65f, 1.35f),
-                lifetime: dashDustLifetime * Random.Range(0.75f, 1.25f)
+                    back * Random.Range(1.2f, sliding ? 4.0f : 3.2f) * worldScale,
+                    Random.Range(0.2f, sliding ? 0.9f : 1.3f) * worldScale, 0f),
+                size:     size * worldScale * Random.Range(0.65f, 1.35f),
+                lifetime: life * Random.Range(0.75f, 1.25f)
             );
         }
     }

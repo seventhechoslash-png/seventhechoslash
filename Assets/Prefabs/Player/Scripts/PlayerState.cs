@@ -12,6 +12,8 @@ public class PlayerState : MonoBehaviour
     public bool didJump;
     public bool isDashing;
     public bool isCrouching;
+    [Tooltip("True during a crouch-slide (dash + crouch). Capped by slideMaxDuration.")]
+    public bool isSliding;
     public Vector2 velocity;
 
     // ── Combat State ───────────────────────────────────────────────────────

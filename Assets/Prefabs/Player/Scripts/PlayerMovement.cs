@@ -50,6 +50,22 @@ public class PlayerMovement : MonoBehaviour
     public float dashCooldown = 0.8f;
     public float doubleTapWindow = 0.25f;
 
+    [Header("Slide (dash + crouch)")]
+    [Tooltip("Max slide length in seconds. This is the hard cap on crouch-dashing.")]
+    public float slideMaxDuration = 2.5f;
+    [Tooltip("Starting slide speed. Near dashSpeed so the handoff is seamless.")]
+    public float slideStartSpeed = 16f;
+    [Tooltip("Speed over the slide. 1 = full, 0 = stopped.")]
+    public AnimationCurve slideFalloff = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
+    [Tooltip("Delay before another slide can start.")]
+    public float slideCooldown = 0.35f;
+    [Tooltip("Releasing crouch ends the slide immediately.")]
+    public bool releaseCrouchEndsSlide = true;
+    [Tooltip("Crouch starts a slide only at this speed or above.\nSits BETWEEN moveSpeed (6) and dashSpeed (18) so normal running never slides.")]
+    public float slideEntrySpeedThreshold = 12f;
+    [Tooltip("After a slide, crouch must be RELEASED before another slide can start.\nStops dash-into-slide chaining while C is held down.")]
+    public bool requireCrouchReleaseBeforeNextSlide = true;
+
     [Header("Dash Jump")]
     [Tooltip("Dash keeps running through the jump as long as the same direction is held.")]
     public bool dashContinuesThroughJump = true;
@@ -73,6 +89,10 @@ public class PlayerMovement : MonoBehaviour
     private float dashDirection = 0f;
     private float dashCooldownRemaining = 0f;
     private float dashTimeRemaining = 0f;
+    private float slideTimeRemaining = 0f;
+    private float slideDirection = 0f;
+    private float slideCooldownRemaining = 0f;
+    private bool  slideConsumed = false;
     private bool prevRightHeld = false;
     private bool prevLeftHeld = false;
     private float lastRightTapTime = -999f;
@@ -82,6 +102,7 @@ public class PlayerMovement : MonoBehaviour
     public bool IsGrounded          => state.isGrounded;
     public bool IsDashing           => state.isDashing;
     public bool IsAirDashing        => state.isDashing && !state.isGrounded;
+    public bool IsSliding           => state.isSliding;
     public bool IsBlocking          => state.isBlocking;
     public bool IsCrouchBlocking    => state.isCrouchBlocking;
     public bool IsVerticalAttacking => state.isVerticalAttacking;
@@ -175,6 +196,14 @@ public class PlayerMovement : MonoBehaviour
         if (dashCooldownRemaining > 0f)
             dashCooldownRemaining = Mathf.Max(0f, dashCooldownRemaining - Time.fixedDeltaTime);
 
+        if (slideCooldownRemaining > 0f)
+            slideCooldownRemaining = Mathf.Max(0f, slideCooldownRemaining - Time.fixedDeltaTime);
+
+        // Re-arm the slide only once crouch has actually been let go.
+        if (!state.crouchHeld) slideConsumed = false;
+
+        TryStartSlideFromCrouch();
+        HandleSlide();
         HandleDash();
         HandleMovement();
         HandleJump();
@@ -187,6 +216,8 @@ public class PlayerMovement : MonoBehaviour
     private void TryStartDash(float dir)
     {
         if (state.isDashing) return;
+        if (state.isSliding) return;               // no dashing out of a slide
+        if (state.crouchHeld && slideConsumed) return;  // must stand up first
         if (state.isKnocked) return;
         if (!state.isGrounded) return;
         if (dashCooldownRemaining > 0f) return;
@@ -211,6 +242,13 @@ public class PlayerMovement : MonoBehaviour
     private void HandleDash()
     {
         if (!state.isDashing) return;
+
+        // Crouch mid-dash hands off to the slide.
+        if (state.crouchHeld && CanStartSlide())
+        {
+            StartSlide(dashDirection);
+            return;
+        }
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         if (state.isAttacking)
@@ -248,6 +286,83 @@ public class PlayerMovement : MonoBehaviour
             rb.linearVelocity = new Vector2(dashDirection * dashSpeed, 0f);
         else
             state.isDashing = false;
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  SLIDE  (dash + crouch)
+    // ─────────────────────────────────────────────────────────
+    private bool CanStartSlide()
+    {
+        if (state.isSliding) return false;
+        if (slideCooldownRemaining > 0f) return false;
+        if (state.isKnocked || state.isAttacking) return false;
+        if (requireCrouchReleaseBeforeNextSlide && slideConsumed) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Speed-based entry, so it works mid-air after a dash jump and a frame
+    /// after the dash itself has ended while momentum is still high.
+    /// </summary>
+    private void TryStartSlideFromCrouch()
+    {
+        if (!state.crouchHeld) return;
+        if (!CanStartSlide()) return;
+
+        float vx = rb.linearVelocity.x;
+        if (Mathf.Abs(vx) < slideEntrySpeedThreshold) return;
+
+        StartSlide(Mathf.Sign(vx));
+    }
+
+    private void StartSlide(float dir)
+    {
+        if (Mathf.Approximately(dir, 0f)) dir = FacingSign();
+
+        slideDirection     = Mathf.Sign(dir);
+        slideTimeRemaining = slideMaxDuration;
+
+        state.isSliding = true;
+        state.isDashing = false;      // slide replaces the dash
+        dashTimeRemaining = 0f;
+
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    private void HandleSlide()
+    {
+        if (!state.isSliding) return;
+
+        if (releaseCrouchEndsSlide && !state.crouchHeld) { EndSlide(); return; }
+        if (state.isAttacking || state.isKnocked)        { EndSlide(); return; }
+
+        slideTimeRemaining -= Time.fixedDeltaTime;
+
+        if (slideTimeRemaining <= 0f) { EndSlide(); return; }
+
+        float t     = 1f - Mathf.Clamp01(slideTimeRemaining / slideMaxDuration);
+        float speed = slideStartSpeed * slideFalloff.Evaluate(t);
+
+        // Direction is LOCKED to slideDirection — input cannot turn you mid-slide.
+        rb.linearVelocity = new Vector2(slideDirection * speed, rb.linearVelocity.y);
+    }
+
+    private void EndSlide()
+    {
+        if (!state.isSliding) return;
+
+        state.isSliding        = false;
+        slideTimeRemaining     = 0f;
+        slideCooldownRemaining = slideCooldown;
+        slideConsumed          = true;   // cleared when crouch is released
+
+        // Kill momentum so it settles into crouch instead of gliding on.
+        rb.linearVelocity = new Vector2(state.groundVelocity.x, rb.linearVelocity.y);
+    }
+
+    private float FacingSign()
+    {
+        return graphics != null ? Mathf.Sign(graphics.localScale.x) : 1f;
     }
 
     private void CheckGrounded()
@@ -317,6 +432,7 @@ public class PlayerMovement : MonoBehaviour
         if (state.isKnocked) return;
 
         if (state.isDashing) return;
+        if (state.isSliding) return;   // HandleSlide owns X and facing while sliding
 
         if (lockMovementDuringBlock && (state.isBlocking || state.isCrouchBlocking))
         {

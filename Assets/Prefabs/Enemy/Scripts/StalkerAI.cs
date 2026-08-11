@@ -124,7 +124,7 @@ public class StalkerAI : MonoBehaviour
 
         // Check if player is guarding
         PlayerGuard guard = player.GetComponent<PlayerGuard>();
-        bool blocked = guard != null && guard.TryBlockDamage(finalTarget);
+        bool blocked = guard != null && guard.TryBlockDamage(finalTarget, gameObject);
 
         if (!blocked)
         {

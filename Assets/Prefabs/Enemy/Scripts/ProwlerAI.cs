@@ -19,6 +19,20 @@ public class ProwlerAI : MonoBehaviour
     public float idleDuration = 1f;
     public int damage = 15;
 
+    [Header("Health")]
+    [Tooltip("Total health pool.")]
+    public float maxHealth = 60f;
+    [Tooltip("Damage per katana hit. Equal to maxHealth = one-hit kill (original behaviour).")]
+    public float katanaDamage = 60f;
+
+    [Header("Hurt Reaction")]
+    [Tooltip("Knockback speed when damaged but not killed.")]
+    public float hurtKnockbackForce = 6f;
+    [Tooltip("How long the Prowler is stunned after taking a non-fatal hit.")]
+    public float hurtStunDuration = 0.35f;
+    public Color hurtFlashColor = Color.red;
+    public float hurtFlashDuration = 0.12f;
+
     [Header("Vertical Limit")]
     [Tooltip("Player must be within this vertical distance of the Prowler sprite to be attacked. Stops attacks when player is on a platform above/below.")]
     public float maxVerticalDistance = 4f;
@@ -32,6 +46,9 @@ public class ProwlerAI : MonoBehaviour
     public LayerMask groundLayer;
 
     private Rigidbody2D rb;
+    private SpriteRenderer sr;
+    private float currentHealth;
+    private float knockbackRemaining;
     private bool isDead = false;
     private float lastAttackTime = -99f;
     private float patrolOriginX;
@@ -44,8 +61,11 @@ public class ProwlerAI : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        currentHealth = maxHealth;
 
         if (graphics == null) graphics = transform.Find("Graphics");
+        if (graphics != null) sr = graphics.GetComponent<SpriteRenderer>();
+        if (sr == null) sr = GetComponentInChildren<SpriteRenderer>();
         if (animator == null && graphics != null)
             animator = graphics.GetComponent<Animator>();
         if (animator == null)
@@ -73,6 +93,13 @@ public class ProwlerAI : MonoBehaviour
     void Update()
     {
         if (isDead || player == null) return;
+
+        // Stunned after a non-fatal hit — skip all AI this frame.
+        if (knockbackRemaining > 0f)
+        {
+            knockbackRemaining -= Time.deltaTime;
+            return;
+        }
         if (attackRunning) return;
 
         float distX = Mathf.Abs(SpriteX() - player.position.x);
@@ -252,7 +279,56 @@ public class ProwlerAI : MonoBehaviour
         TakeDamage(EnemyDeathEffect.CutType.Horizontal);
     }
 
+    /// <summary>Katana hit — deals katanaDamage.</summary>
     public void TakeDamage(EnemyDeathEffect.CutType cut)
+    {
+        TakeDamage(katanaDamage, cut, player != null ? player.position : transform.position);
+    }
+
+    /// <summary>
+    /// Full damage entry point. Used by the katana and by PlayerGuard's parry counter.
+    /// </summary>
+    public void TakeDamage(float amount, EnemyDeathEffect.CutType cut, Vector3 sourcePosition)
+    {
+        if (isDead) return;
+
+        currentHealth -= amount;
+
+        if (currentHealth <= 0f)
+        {
+            Die(cut);
+            return;
+        }
+
+        // ── Survived: stun + knockback instead of dying ──
+        StopAllCoroutines();
+        attackRunning = false;
+        state = State.Idle;
+
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        float kbDir = transform.position.x > sourcePosition.x ? 1f : -1f;
+        rb.linearVelocity  = new Vector2(kbDir * hurtKnockbackForce, rb.linearVelocity.y);
+        knockbackRemaining = hurtStunDuration;
+
+        FaceTarget(sourcePosition.x);   // keep facing the player while shoved away
+
+        if (sr != null)
+        {
+            StopCoroutine(nameof(HurtFlash));
+            StartCoroutine(HurtFlash());
+        }
+    }
+
+    private System.Collections.IEnumerator HurtFlash()
+    {
+        Color original = sr.color;
+        sr.color = hurtFlashColor;
+        yield return new WaitForSecondsRealtime(hurtFlashDuration);
+        sr.color = original;
+    }
+
+    private void Die(EnemyDeathEffect.CutType cut)
     {
         if (isDead) return;
         isDead = true;

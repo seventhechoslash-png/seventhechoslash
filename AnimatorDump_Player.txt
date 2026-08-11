@@ -1,0 +1,164 @@
+═══════════════════════════════════════════════════
+CONTROLLER: Player
+Path: Assets/Prefabs/Player/Animations/Player.controller
+═══════════════════════════════════════════════════
+
+PARAMETERS (14):
+    isRunning                Bool
+    isCrouching              Bool
+    isGrounded               Bool
+    yVelocity                Float
+    attack                   Trigger
+    didJump                  Bool
+    isDead                   Bool
+    isDashing                Bool
+    isBlocking               Bool
+    verticalAttack           Trigger
+    isCrouchGuard            Bool
+    upperHurt                Trigger
+    middleHurt               Trigger
+    isSliding                Bool
+
+─── LAYER: Base Layer ───
+DEFAULT STATE: Idle
+
+ANY STATE TRANSITIONS (8) — evaluated top to bottom:
+    [0] AnyState -> Attack
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=True  interruptionSource=None
+        condition: attack If 0
+        condition: isCrouching IfNot 0
+    [1] AnyState -> Death
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=False  interruptionSource=None
+        condition: isDead If 0
+    [2] AnyState -> Block
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=False  interruptionSource=None
+        condition: isBlocking If 0
+    [3] AnyState -> VerticalAttack
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=False  interruptionSource=None
+        condition: verticalAttack If 0
+    [4] AnyState -> CrouchGuard
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=True  interruptionSource=None
+        condition: isCrouchGuard If 0
+        condition: isCrouching If 0
+    [5] AnyState -> UpperHurt
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=False  interruptionSource=None
+        condition: upperHurt If 0
+    [6] AnyState -> MiddleHurt
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=False  interruptionSource=None
+        condition: middleHurt If 0
+    [7] AnyState -> Slide
+        hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=False  interruptionSource=None
+        condition: isSliding If 0
+        condition: isCrouching If 0
+
+STATES (15):
+  ▸ Idle   clip=Idle   speed=0.5
+      Idle -> Crouch
+          hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isCrouching If 0
+          condition: isGrounded If 0
+      Idle -> JumpUp
+          hasExitTime=False  exitTime=0.5  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isGrounded IfNot 0
+          condition: yVelocity Greater 0
+      Idle -> Run
+          hasExitTime=False  exitTime=0.5  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isRunning If 0
+      Idle -> Attack
+          hasExitTime=False  exitTime=0.5  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: attack If 0
+      Idle -> Dash
+          hasExitTime=False  exitTime=0.6  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isDashing If 0
+  ▸ Crouch   clip=Crouch   speed=1
+      Crouch -> Idle
+          hasExitTime=False  exitTime=0  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isCrouching IfNot 0
+          condition: isGrounded If 0
+      Crouch -> SitAttack
+          hasExitTime=False  exitTime=0  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: attack If 0
+          condition: isCrouching If 0
+      Crouch -> CrouchGuard
+          hasExitTime=False  exitTime=0  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isCrouchGuard If 0
+  ▸ JumpUp   clip=JumpUp   speed=1
+      JumpUp -> Fall
+          hasExitTime=False  exitTime=0.7  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: didJump If 0
+          condition: yVelocity Less 0
+          condition: isGrounded IfNot 0
+      JumpUp -> Idle
+          hasExitTime=False  exitTime=0.25  duration=0.03  canTransitionToSelf=True  interruptionSource=None
+          condition: isGrounded If 0
+          condition: isRunning IfNot 0
+      JumpUp -> Run
+          hasExitTime=False  exitTime=0.25  duration=0.03  canTransitionToSelf=True  interruptionSource=None
+          condition: isGrounded If 0
+          condition: isRunning If 0
+  ▸ Fall   clip=Fall   speed=1
+      Fall -> Idle
+          hasExitTime=False  exitTime=0.75  duration=0.03  canTransitionToSelf=True  interruptionSource=None
+          condition: isGrounded If 0
+          condition: isRunning IfNot 0
+      Fall -> Run
+          hasExitTime=False  exitTime=0.25  duration=0.03  canTransitionToSelf=True  interruptionSource=None
+          condition: isGrounded If 0
+          condition: isRunning If 0
+  ▸ Run   clip=Run   speed=1.2
+      Run -> JumpUp
+          hasExitTime=False  exitTime=0.5714285  duration=0.25  canTransitionToSelf=True  interruptionSource=None
+          condition: isGrounded IfNot 0
+          condition: didJump If 0
+          condition: yVelocity Greater 0.1
+      Run -> Idle
+          hasExitTime=False  exitTime=0.5714285  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isRunning IfNot 0
+          condition: isGrounded If 0
+      Run -> Dash
+          hasExitTime=False  exitTime=0.7  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isDashing If 0
+  ▸ Attack   clip=Attack   speed=1.6
+      Attack -> Idle
+          hasExitTime=True  exitTime=1  duration=0  canTransitionToSelf=True  interruptionSource=None
+          conditions: NONE
+  ▸ SitAttack   clip=SitAttack   speed=1.4
+      SitAttack -> Crouch
+          hasExitTime=True  exitTime=1  duration=0  canTransitionToSelf=True  interruptionSource=None
+          conditions: NONE
+  ▸ Death   clip=Death   speed=1.5
+      (no outgoing transitions)
+  ▸ Dash   clip=Dasshh   speed=0.5
+      Dash -> Run
+          hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isDashing IfNot 0
+      Dash -> Idle
+          hasExitTime=False  exitTime=0.75  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isDashing IfNot 0
+      Dash -> Fall
+          hasExitTime=False  exitTime=0  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isGrounded IfNot 0
+  ▸ Block   clip=Block   speed=1
+      Block -> Idle
+          hasExitTime=False  exitTime=0  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isBlocking IfNot 0
+  ▸ VerticalAttack   clip=VerticleAttack   speed=0.82
+      VerticalAttack -> Idle
+          hasExitTime=True  exitTime=1  duration=0  canTransitionToSelf=True  interruptionSource=None
+          conditions: NONE
+  ▸ CrouchGuard   clip=CrouchGuard   speed=1
+      CrouchGuard -> Crouch
+          hasExitTime=False  exitTime=0  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isCrouchGuard IfNot 0
+  ▸ MiddleHurt   clip=MiddleHurt   speed=0.3
+      MiddleHurt -> Idle
+          hasExitTime=True  exitTime=0  duration=0.25  canTransitionToSelf=True  interruptionSource=None
+          conditions: NONE
+  ▸ UpperHurt   clip=UpperHurt   speed=0.3
+      UpperHurt -> Idle
+          hasExitTime=True  exitTime=0  duration=0.25  canTransitionToSelf=True  interruptionSource=None
+          conditions: NONE
+  ▸ Slide   clip=Slide   speed=1
+      Slide -> Crouch
+          hasExitTime=False  exitTime=0  duration=0  canTransitionToSelf=True  interruptionSource=None
+          condition: isSliding IfNot 0

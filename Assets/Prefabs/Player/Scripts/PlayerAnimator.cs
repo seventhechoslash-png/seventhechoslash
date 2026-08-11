@@ -27,7 +27,9 @@ public class PlayerAnimator : MonoBehaviour
         AnimatorStateInfo st = animator.GetCurrentAnimatorStateInfo(0);
         if (st.IsName("Death")) return;
 
-        bool isCrouching = (state.crouchHeld || state.isCrouchBlocking) && state.isGrounded;
+        // Sliding outranks crouching, or both bools fire and the states fight.
+        bool isCrouching = (state.crouchHeld || state.isCrouchBlocking)
+                           && state.isGrounded && !state.isSliding;
         bool allowRun    = !state.isAttacking && !state.isBlocking && !state.isCrouchBlocking;
         bool isRunning   = allowRun && Mathf.Abs(state.moveInput.x) > 0.1f
                            && state.isGrounded && !isCrouching;
@@ -39,6 +41,7 @@ public class PlayerAnimator : MonoBehaviour
         SetBool("isCrouchGuard",       state.isCrouchBlocking);
         SetBool("isVerticalAttacking", state.isVerticalAttacking);
         SetBool("isDashing",           state.isDashing);
+        SetBool("isSliding",           state.isSliding);
         SetBool(didJumpBool,           state.didJump);
         SetFloat("yVelocity",          state.velocity.y);
     }

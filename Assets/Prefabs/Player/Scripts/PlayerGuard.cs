@@ -20,19 +20,16 @@ public class PlayerGuard : MonoBehaviour
     public LaserBlockEffect blockEffect;
 
     [Header("Parry Window")]
-    [Tooltip("Seconds after raising guard during which a block counts as a parry.\n0.18 = about 11 frames at 60fps. Lower it to make parries harder.")]
-    [Range(0.02f, 0.5f)]
-    public float parryWindow = 0.18f;
+    [Tooltip("Seconds after raising guard during which a block counts as a parry.\n0.30 = about 18 frames at 60fps. Lower it to make parries harder.")]
+    [Range(0.02f, 0.75f)]
+    public float parryWindow = 0.30f;
 
     [Header("Parry Counter-Attack")]
     [Tooltip("A successful parry damages the attacker instead of you.")]
     public bool parryDamagesAttacker = true;
 
-    [Tooltip("Damage dealt to enemies that have a real health pool (DespairAI).")]
+    [Tooltip("Damage dealt to the attacker on a successful parry.\nCompare against each enemy's maxHealth (all default to 60).")]
     public float parryCounterDamage = 25f;
-
-    [Tooltip("Prowler and Stalker have NO health system — any damage kills them outright.\nLeave ON for a one-hit parry kill, turn OFF to leave them untouched.")]
-    public bool parryKillsHealthlessEnemies = true;
 
     [Tooltip("Which death animation a parry kill plays.")]
     public EnemyDeathEffect.CutType parryCutType = EnemyDeathEffect.CutType.Horizontal;
@@ -156,36 +153,31 @@ public class PlayerGuard : MonoBehaviour
                          ?? attacker.GetComponentInParent<DespairAI>();
         if (despair != null)
         {
-            despair.TakeDamage(parryCounterDamage, transform.position);
+            despair.TakeParryCounter(parryCounterDamage, transform.position);
             if (logGuardEvents)
                 Debug.Log($"[Parry] {parryCounterDamage} dmg -> DespairAI");
             return;
         }
 
-        if (!parryKillsHealthlessEnemies)
-        {
-            if (logGuardEvents)
-                Debug.Log("[Parry] attacker has no health pool — counter skipped");
-            return;
-        }
-
-        // ── Stalker — no health, TakeDamage() is death ──
+        // ── Stalker ──
         StalkerHealth stalker = attacker.GetComponent<StalkerHealth>()
                              ?? attacker.GetComponentInParent<StalkerHealth>();
         if (stalker != null)
         {
-            stalker.TakeDamage(parryCutType);
-            if (logGuardEvents) Debug.Log("[Parry] killed Stalker");
+            stalker.TakeDamage(parryCounterDamage, parryCutType);
+            if (logGuardEvents)
+                Debug.Log($"[Parry] {parryCounterDamage} dmg -> Stalker");
             return;
         }
 
-        // ── Prowler — no health, TakeDamage() is death ──
+        // ── Prowler ──
         ProwlerAI prowler = attacker.GetComponent<ProwlerAI>()
                          ?? attacker.GetComponentInParent<ProwlerAI>();
         if (prowler != null)
         {
-            prowler.TakeDamage(parryCutType);
-            if (logGuardEvents) Debug.Log("[Parry] killed Prowler");
+            prowler.TakeDamage(parryCounterDamage, parryCutType, transform.position);
+            if (logGuardEvents)
+                Debug.Log($"[Parry] {parryCounterDamage} dmg -> Prowler");
             return;
         }
 

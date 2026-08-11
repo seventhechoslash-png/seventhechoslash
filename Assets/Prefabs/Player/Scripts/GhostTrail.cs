@@ -14,13 +14,27 @@ public class GhostTrail : MonoBehaviour
     [Header("Scale")]
     public float scaleMultiplier = 1.01f;
 
+    [Header("Auto Drive")]
+    [Tooltip("Start/stop the trail automatically from PlayerState instead of Animation Events.\nIf your Dash clip has StartTrail/StopTrail events, DELETE them or they will fight this.")]
+    public bool autoDriveFromPlayerState = true;
+    public bool trailWhileDashing = true;
+    public bool trailWhileSliding = true;
+
     private SpriteRenderer characterSR;
+    private PlayerState playerState;
     private bool isRunning = false;
     private Queue<GameObject> ghostPool = new Queue<GameObject>();
 
     void Start()
     {
         characterSR = GetComponent<SpriteRenderer>();
+
+        // GhostTrail lives on the Graphics child; PlayerState is on the root.
+        playerState = GetComponentInParent<PlayerState>();
+        if (autoDriveFromPlayerState && playerState == null)
+            Debug.LogWarning("[GhostTrail] autoDriveFromPlayerState is ON but no PlayerState " +
+                             "found in any parent. Trail will not start automatically.");
+
         PrewarmPool();
     }
 
@@ -42,6 +56,17 @@ public class GhostTrail : MonoBehaviour
         sr.sortingLayerName = characterSR.sortingLayerName;
         sr.sortingOrder = characterSR.sortingOrder - 1;
         return ghost;
+    }
+
+    void Update()
+    {
+        if (!autoDriveFromPlayerState || playerState == null) return;
+
+        bool want = (trailWhileDashing && playerState.isDashing)
+                 || (trailWhileSliding && playerState.isSliding);
+
+        if (want) StartTrail();
+        else      StopTrail();
     }
 
     public void StartTrail()
