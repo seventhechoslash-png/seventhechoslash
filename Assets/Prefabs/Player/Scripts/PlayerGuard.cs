@@ -20,9 +20,9 @@ public class PlayerGuard : MonoBehaviour
     public LaserBlockEffect blockEffect;
 
     [Header("Parry Window")]
-    [Tooltip("Seconds after raising guard during which a block counts as a parry.\n0.30 = about 18 frames at 60fps. Lower it to make parries harder.")]
-    [Range(0.02f, 0.75f)]
-    public float parryWindow = 0.30f;
+    [Tooltip("Seconds after raising guard during which a block counts as a parry.\nEnemy wind-ups are long (Despair lands damage 0.4s after the swing starts),\nso this needs to cover your reaction time PLUS the remaining wind-up.\nTurn on Log Guard Events and read the reported timing to tune it exactly.")]
+    [Range(0.02f, 1.5f)]
+    public float parryWindow = 0.45f;
 
     [Header("Parry Counter-Attack")]
     [Tooltip("A successful parry damages the attacker instead of you.")]
@@ -39,7 +39,10 @@ public class PlayerGuard : MonoBehaviour
     public bool slideOnBlock = true;
 
     [Header("Debug")]
-    public bool logGuardEvents = false;
+    [Tooltip("Logs the EXACT time your guard had been up when each hit landed.\nIf it says 'block' with 0.42s, set parryWindow above 0.42.")]
+    public bool logGuardEvents = true;
+    [Tooltip("Draws a live on-screen readout of the parry window while playing.")]
+    public bool showOnScreenDebug = true;
 
     private PlayerMovement playerMovement;
     private PlayerHealth playerHealth;
@@ -47,6 +50,11 @@ public class PlayerGuard : MonoBehaviour
 
     private float guardRaisedTime = -999f;
     private bool wasGuarding;
+
+    // ── Debug readout ──
+    private string lastResult = "-";
+    private float  lastResultTime = -999f;
+    private float  lastHeldFor;
 
     // Public so StalkerAI / ProwlerAI can check it
     public bool IsGuarding => playerMovement != null &&
@@ -133,8 +141,50 @@ public class PlayerGuard : MonoBehaviour
                 ApplyParryCounter(attacker);
         }
 
+        // ── Timing diagnostic ──
+        float heldFor = Time.unscaledTime - guardRaisedTime;
+        lastHeldFor    = heldFor;
+        lastResult     = isParry ? "PARRY" : "BLOCK";
+        lastResultTime = Time.unscaledTime;
+
         if (logGuardEvents)
-            Debug.Log($"[Guard] {(isParry ? "PARRY" : "block")} at {hitPoint} vs {(attacker != null ? attacker.name : "unknown")}");
+        {
+            string who = attacker != null ? attacker.name : "unknown";
+            if (isParry)
+            {
+                Debug.Log($"<color=cyan>[Guard] PARRY</color> vs {who} — guard was up {heldFor:F3}s (window {parryWindow:F2}s)");
+            }
+            else
+            {
+                float missedBy = heldFor - parryWindow;
+                Debug.Log($"[Guard] block vs {who} — guard was up {heldFor:F3}s, " +
+                          $"window is {parryWindow:F2}s. MISSED BY {missedBy:F3}s. " +
+                          $"Set Parry Window above {heldFor:F2} to parry this attack.");
+            }
+        }
+    }
+
+    void OnGUI()
+    {
+        if (!showOnScreenDebug) return;
+
+        GUIStyle style = new GUIStyle(GUI.skin.label) { fontSize = 18, fontStyle = FontStyle.Bold };
+
+        bool open = IsParryWindowOpen;
+        style.normal.textColor = open ? Color.cyan : (IsGuarding ? Color.yellow : Color.gray);
+
+        string status = !IsGuarding ? "guard down"
+                      : open        ? $"PARRY WINDOW OPEN  ({parryWindow - (Time.unscaledTime - guardRaisedTime):F2}s left)"
+                                    : "guarding (window closed)";
+
+        GUI.Label(new Rect(12, 12, 700, 30), $"Guard: {status}", style);
+
+        if (Time.unscaledTime - lastResultTime < 2f)
+        {
+            style.normal.textColor = lastResult == "PARRY" ? Color.cyan : Color.white;
+            GUI.Label(new Rect(12, 40, 700, 30),
+                      $"Last hit: {lastResult}  (guard was up {lastHeldFor:F3}s / window {parryWindow:F2}s)", style);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════════════════

@@ -1,17 +1,24 @@
 // ============================================================
 //  DespairAI.cs  –  Seventh Echo
 //
-//  Robed staff enemy. Walks platforms, turns at edges,
-//  melee attacks when player is in range.
-//  Same architecture as ProwlerAI. No hurt/dead animations.
+//  Robed staff enemy. Patrols platforms, chases the player on
+//  sight, melee attacks in range, reacts to parries.
+//
+//  IMPORTANT CHANGE vs the previous version:
+//  The old script measured distances from graphics.position but
+//  drew gizmos from transform.position + graphicsOffset. Those are
+//  two different points, so the gizmos did not show what the AI
+//  actually used. graphicsOffsetX/Y are GONE. Everything - logic
+//  and gizmos alike - now measures from OriginX()/OriginY(), the
+//  collider centre. What you see is what the AI uses.
 //
 //  SETUP:
 //    1. Add to Despair ROOT GameObject.
-//    2. Add Rigidbody2D (Gravity Scale 1, Freeze Rotation Z).
-//    3. Add CapsuleCollider2D sized to body.
+//    2. Rigidbody2D (Gravity Scale 1, Freeze Rotation Z).
+//    3. CapsuleCollider2D sized to the body.
 //    4. Graphics child: SpriteRenderer + Animator.
-//    5. Add EnemyDeathEffect to root (same as Prowler).
-//    6. Tag Player GameObject as "Player".
+//    5. EnemyDeathEffect on the root.
+//    6. Player GameObject tagged "Player".
 // ============================================================
 
 using UnityEngine;
@@ -26,6 +33,7 @@ public class DespairAI : MonoBehaviour
     private SpriteRenderer    sr;
     private Animator          anim;
     private Transform         player;
+    private Collider2D        playerCol;
 
     [Header("Movement")]
     public float walkSpeed      = 2.5f;
@@ -40,54 +48,56 @@ public class DespairAI : MonoBehaviour
     [Header("Detection & Chase")]
     [Tooltip("Horizontal distance at which Despair first spots the player.")]
     public float detectionRange = 9f;
-    [Tooltip("Vertical tolerance for spotting. Stops it aggroing on players on far-off platforms.")]
+    [Tooltip("Vertical tolerance for spotting. Absolute - above or below.")]
     public float maxVerticalDetection = 3f;
-    [Tooltip("Once aggroed it chases until the player is FARTHER than this.\nMake it well above detectionRange or aggro flickers at the edge.")]
+    [Tooltip("Once aggroed it chases until the player is FARTHER than this.\nKeep well above detectionRange or aggro flickers at the boundary.")]
     public float loseAggroRange = 18f;
     [Tooltip("Seconds it keeps hunting after the player leaves loseAggroRange.")]
     public float aggroMemoryDuration = 5f;
-    [Tooltip("Chase speed. Usually a bit faster than patrol walkSpeed.")]
+    [Tooltip("Chase speed. Usually a little faster than walkSpeed.")]
     public float chaseSpeed = 3.2f;
     [Tooltip("Stop at ledges and walls while chasing instead of walking off.")]
     public bool stopAtLedges = true;
-    [Tooltip("Stand still between swings when the player is in range, instead of drifting back into patrol.")]
+    [Tooltip("Stand still between swings when the player is in range.")]
     public bool holdGroundWhenInRange = true;
-    [Tooltip("Log aggro state changes to the Console.")]
-    public bool logAggro = false;
 
     [Header("Attack")]
-    public float attackRange               = 2.5f;
-    public float attackCooldown            = 1.8f;
-    public float attackDamage              = 10f;
+    public float attackRange    = 2.5f;
+    public float attackCooldown = 1.2f;
+    public float attackDamage   = 10f;
+    [Tooltip("Vertical reach, ABSOLUTE - blocks swings at a player far above OR below.")]
     public float maxVerticalAttackDistance = 2.0f;
-    public float attackAnimDuration        = 0.8f;
+    public float attackAnimDuration = 0.8f;
 
-    [Tooltip("Delay before damage is dealt (fraction of attack anim). 0.5 = halfway through the swing.\nIGNORED when useAnimationEventForDamage is ON.")]
+    [Tooltip("Delay before damage lands, as a fraction of the attack anim.\nIGNORED when useAnimationEventForDamage is ON.")]
     [Range(0f, 1f)] public float damageTimingFraction = 0.5f;
 
-    [Tooltip("ON  = damage fires from an Animation Event on the attack clip (survives retiming).\nOFF = damage fires on a timer at damageTimingFraction (breaks when you retime).\nTurn ON after adding the DealMeleeDamage event to DespairAttack.anim.")]
+    [Tooltip("ON  = damage fires from an Animation Event calling DealMeleeDamage() (survives retiming).\nOFF = damage fires on a timer at damageTimingFraction.")]
     public bool useAnimationEventForDamage = false;
 
     [Header("Health")]
-    public float maxHealth       = 60f;
-    [Tooltip("Damage received per katana hit. Set to maxHealth for one-hit kill.")]
-    public float katanaDamage    = 60f;
+    public float maxHealth    = 60f;
+    [Tooltip("Damage per katana hit. Equal to maxHealth = one-hit kill.")]
+    public float katanaDamage = 60f;
 
     [Header("Knockback")]
     public float knockbackForce    = 4f;
     public float knockbackDuration = 0.15f;
 
     [Header("Parry Knockback (parry only)")]
-    [Tooltip("Stronger shove used ONLY when the player parries. Normal katana hits use the values above.")]
     public float parryKnockbackForce = 8f;
     [Tooltip("MUST match the DespairKnockback clip length = frameCount / sampleRate.")]
     public float parryKnockbackDuration = 0.47f;
-    [Tooltip("Fires the 'knockback' animator trigger on a parry.")]
-    public bool playParryKnockbackAnim = true;
+    public bool  playParryKnockbackAnim = true;
 
-    [Header("Graphics Offsets (read from Inspector)")]
-    public float graphicsOffsetX = -10.17f;
-    public float graphicsOffsetY = -1.43f;
+    [Header("Debug")]
+    [Tooltip("Logs aggro changes.")]
+    public bool logAggro = false;
+    [Tooltip("Live on-screen readout of dx / dy against the attack thresholds.")]
+    public bool showRangeDebug = true;
+    [Tooltip("Prints the same numbers to the CONSOLE every logInterval seconds.\nUse this if the on-screen text is not visible.")]
+    public bool logRangeToConsole = true;
+    public float logInterval = 0.5f;
 
     // ── Animator hashes ──
     private static readonly int AnimWalk      = Animator.StringToHash("walk");
@@ -106,6 +116,19 @@ public class DespairAI : MonoBehaviour
     private float aggroMemoryRemaining;
     private int   facingDir = 1;
     private Vector3 spawnPos;
+    private float baseColOffsetX;
+    private float logTimer;
+
+    // ═════════════════════════════════════════════════════════
+    //  ONE MEASUREMENT ORIGIN
+    //  Every distance check AND every gizmo uses these. If the
+    //  gizmo looks wrong, the AI is wrong, and vice versa.
+    // ═════════════════════════════════════════════════════════
+    private float OriginX() => col != null ? col.bounds.center.x : transform.position.x;
+    private float OriginY() => col != null ? col.bounds.center.y : transform.position.y;
+
+    /// <summary>Bottom of the collider - used for ground rays only.</summary>
+    private float FeetY() => col != null ? col.bounds.min.y : transform.position.y;
 
     // ─────────────────────────────────────────────────────────
     private void Awake()
@@ -123,11 +146,18 @@ public class DespairAI : MonoBehaviour
         else Debug.LogError("[DespairAI] No 'Graphics' child found.");
 
         GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
+        if (p != null)
+        {
+            player    = p.transform;
+            playerCol = p.GetComponent<Collider2D>();
+            if (playerCol == null) playerCol = p.GetComponentInChildren<Collider2D>();
+        }
         else Debug.LogWarning("[DespairAI] No GameObject tagged 'Player'.");
 
         currentHealth = maxHealth;
         spawnPos      = transform.position;
+
+        if (col != null) baseColOffsetX = col.offset.x;
 
         if (groundLayer.value == 0)
         {
@@ -142,8 +172,7 @@ public class DespairAI : MonoBehaviour
 
         attackCooldownRemaining = Mathf.Max(0f, attackCooldownRemaining - Time.deltaTime);
 
-        // Knockback is checked BEFORE isAttacking. A parry always lands mid-swing,
-        // and the old order let isAttacking swallow it until the swing finished.
+        // Knockback outranks isAttacking - a parry always lands mid-swing.
         if (knockbackRemaining > 0f)
         {
             knockbackRemaining -= Time.deltaTime;
@@ -153,24 +182,23 @@ public class DespairAI : MonoBehaviour
         if (isAttacking)
         {
             attackAnimRemaining -= Time.deltaTime;
-            if (attackAnimRemaining <= 0f)
-                isAttacking = false;
+            if (attackAnimRemaining <= 0f) isAttacking = false;
             return;
         }
 
         UpdateAggro();
+        LogRange();
 
         if (isAggro && player != null)
         {
             if (InAttackRange())
             {
-                if (CanAttackPlayer())
+                if (attackCooldownRemaining <= 0f)
                 {
                     StartAttack();
                     return;
                 }
 
-                // On cooldown but the player is right there — hold the line.
                 if (holdGroundWhenInRange)
                 {
                     HoldPosition();
@@ -186,15 +214,18 @@ public class DespairAI : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────────────────
-    //  SPRITE POSITION (uses Graphics child world pos)
+    //  DISTANCE TO PLAYER
     // ─────────────────────────────────────────────────────────
-    // Use collider center for physics-based checks (edge/wall detection)
-    private float ColX() => col != null ? col.bounds.center.x : transform.position.x;
-    private float ColY() => col != null ? col.bounds.min.y : transform.position.y;
+    // Measure CENTRE to CENTRE. player.position is the root pivot, which on a
+    // platformer sits at the FEET, while OriginY() is Despair's chest. Comparing
+    // those two made dy read ~2 while standing on the same floor, and ~0 while
+    // standing on his head - so he refused to swing at ground level and only
+    // attacked when you jumped on him.
+    private float PlayerX() => playerCol != null ? playerCol.bounds.center.x : player.position.x;
+    private float PlayerY() => playerCol != null ? playerCol.bounds.center.y : player.position.y;
 
-    // Use sprite position for player-facing checks (attack range, facing)
-    private float SpriteX() => graphics != null ? graphics.position.x : transform.position.x;
-    private float SpriteY() => graphics != null ? graphics.position.y : transform.position.y;
+    private float DistX() => Mathf.Abs(PlayerX() - OriginX());
+    private float DistY() => Mathf.Abs(PlayerY() - OriginY());
 
     // ─────────────────────────────────────────────────────────
     //  AGGRO
@@ -203,8 +234,8 @@ public class DespairAI : MonoBehaviour
     {
         if (player == null) { isAggro = false; return; }
 
-        float dx = Mathf.Abs(player.position.x - SpriteX());
-        float dy = Mathf.Abs(player.position.y - SpriteY());
+        float dx = DistX();
+        float dy = DistY();
 
         if (!isAggro)
         {
@@ -212,12 +243,11 @@ public class DespairAI : MonoBehaviour
             {
                 isAggro = true;
                 aggroMemoryRemaining = aggroMemoryDuration;
-                if (logAggro) Debug.Log($"[Despair] spotted player at {dx:F1}m — chasing");
+                if (logAggro) Debug.Log($"[Despair] spotted player at {dx:F1}m - chasing");
             }
             return;
         }
 
-        // Already hunting. Only a long escape breaks it, not the detection range.
         if (dx <= loseAggroRange)
         {
             aggroMemoryRemaining = aggroMemoryDuration;
@@ -228,12 +258,12 @@ public class DespairAI : MonoBehaviour
             if (aggroMemoryRemaining <= 0f)
             {
                 isAggro = false;
-                if (logAggro) Debug.Log($"[Despair] lost player at {dx:F1}m — back to patrol");
+                if (logAggro) Debug.Log($"[Despair] lost player at {dx:F1}m - back to patrol");
             }
         }
     }
 
-    /// <summary>Force aggro — used when damaged, so it fights back if hit from range.</summary>
+    /// <summary>Force aggro - used when damaged so it fights back if hit from range.</summary>
     public void AlertToPlayer()
     {
         isAggro = true;
@@ -241,15 +271,14 @@ public class DespairAI : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────────────────
-    //  CHASE / HOLD
+    //  CHASE / HOLD / PATROL
     // ─────────────────────────────────────────────────────────
     private void Chase()
     {
-        int dir = player.position.x > SpriteX() ? 1 : -1;
+        int dir = PlayerX() > OriginX() ? 1 : -1;
         facingDir = dir;
         Flip(facingDir);
 
-        // Don't chase off a cliff or into a wall.
         if (stopAtLedges && (!GroundAhead(dir) || WallAhead(dir)))
         {
             HoldPosition();
@@ -265,35 +294,15 @@ public class DespairAI : MonoBehaviour
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
         if (player != null)
-            Flip(player.position.x > SpriteX() ? 1 : -1);
+            Flip(PlayerX() > OriginX() ? 1 : -1);
 
         if (anim != null) anim.SetBool(AnimWalk, false);
     }
 
-    // ─────────────────────────────────────────────────────────
-    //  GROUND / WALL PROBES
-    // ─────────────────────────────────────────────────────────
-    private bool GroundAhead(int dir)
-    {
-        Vector2 origin = new Vector2(ColX() + dir * edgeRayOffsetX, ColY());
-        return Physics2D.Raycast(origin, Vector2.down, edgeRayLength, groundLayer);
-    }
-
-    private bool WallAhead(int dir)
-    {
-        return Physics2D.Raycast(
-            new Vector2(ColX(), ColY() + 0.5f),
-            new Vector2(dir, 0f), wallRayLength, groundLayer);
-    }
-
-    // ─────────────────────────────────────────────────────────
-    //  PATROL
-    // ─────────────────────────────────────────────────────────
     private void Patrol()
     {
-        // Turn at patrol limits
-        if (ColX() > spawnPos.x + graphicsOffsetX + patrolDistance) facingDir = -1;
-        if (ColX() < spawnPos.x + graphicsOffsetX - patrolDistance) facingDir =  1;
+        if (OriginX() > spawnPos.x + patrolDistance) facingDir = -1;
+        if (OriginX() < spawnPos.x - patrolDistance) facingDir =  1;
 
         if (!GroundAhead(facingDir)) facingDir = -facingDir;
         if (WallAhead(facingDir))    facingDir = -facingDir;
@@ -304,21 +313,30 @@ public class DespairAI : MonoBehaviour
     }
 
     // ─────────────────────────────────────────────────────────
-    //  ATTACK
+    //  GROUND / WALL PROBES
     // ─────────────────────────────────────────────────────────
-    /// <summary>Range only — ignores cooldown. Used to decide whether to hold ground.</summary>
-    private bool InAttackRange()
+    private bool GroundAhead(int dir)
     {
-        float dx = Mathf.Abs(player.position.x - SpriteX());
-        float dy = player.position.y - SpriteY();
-        if (dy > maxVerticalAttackDistance) return false;
-        return dx <= attackRange;
+        Vector2 origin = new Vector2(OriginX() + dir * edgeRayOffsetX, FeetY());
+        return Physics2D.Raycast(origin, Vector2.down, edgeRayLength, groundLayer);
     }
 
-    private bool CanAttackPlayer()
+    private bool WallAhead(int dir)
     {
-        if (attackCooldownRemaining > 0f) return false;
-        return InAttackRange();
+        return Physics2D.Raycast(
+            new Vector2(OriginX(), FeetY() + 0.5f),
+            new Vector2(dir, 0f), wallRayLength, groundLayer);
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  ATTACK
+    // ─────────────────────────────────────────────────────────
+    /// <summary>Range only, ignores cooldown. dy is ABSOLUTE now - the old
+    /// signed check only rejected players ABOVE, never below.</summary>
+    private bool InAttackRange()
+    {
+        if (player == null) return false;
+        return DistX() <= attackRange && DistY() <= maxVerticalAttackDistance;
     }
 
     private void StartAttack()
@@ -329,8 +347,7 @@ public class DespairAI : MonoBehaviour
 
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
 
-        float dir = player.position.x > SpriteX() ? 1f : -1f;
-        Flip((int)dir);
+        Flip(PlayerX() > OriginX() ? 1 : -1);
 
         if (anim != null)
         {
@@ -338,7 +355,6 @@ public class DespairAI : MonoBehaviour
             anim.SetTrigger(AnimAttack);
         }
 
-        // Damage source: Animation Event (preferred) or the legacy timer.
         damageDealtThisSwing = false;
 
         if (!useAnimationEventForDamage)
@@ -351,19 +367,16 @@ public class DespairAI : MonoBehaviour
         DealMeleeDamage();
     }
 
-    // Called by Animation Event on DespairAttack clip at the hit frame
+    /// <summary>Called by an Animation Event on the attack clip, or by the timer.</summary>
     public void DealMeleeDamage()
     {
-        if (player == null) return;
-        if (isDead) return;
-
-        // Guards against double damage if both the Animation Event and the timer
-        // are somehow live, and against multi-frame event retriggers.
+        if (player == null || isDead) return;
         if (damageDealtThisSwing) return;
         damageDealtThisSwing = true;
-        float dx = Mathf.Abs(player.position.x - SpriteX());
-        float dy = Mathf.Abs(player.position.y - SpriteY());
-        if (dx > attackRange * 1.1f || dy > maxVerticalAttackDistance) return;
+
+        // Slightly generous on X so a player edging away still gets clipped.
+        if (DistX() > attackRange * 1.15f) return;
+        if (DistY() > maxVerticalAttackDistance) return;
 
         PlayerHealth ph = player.GetComponent<PlayerHealth>();
         if (ph != null)
@@ -376,21 +389,29 @@ public class DespairAI : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     //  TAKE DAMAGE
     // ─────────────────────────────────────────────────────────
-
-    // Called by KatanaHitbox (same signature as ProwlerAI/StalkerHealth)
     public void TakeDamage(EnemyDeathEffect.CutType cutType)
     {
         TakeDamage(katanaDamage, player != null ? player.position : transform.position);
     }
 
-    /// <summary>
-    /// Called by PlayerGuard on a successful parry ONLY.
-    /// Interrupts the swing, applies the bigger shove, fires the knockback anim.
-    /// </summary>
+    public void TakeDamage(float amount, Vector3 sourcePosition)
+    {
+        if (isDead) return;
+        AlertToPlayer();
+
+        currentHealth -= amount;
+
+        float kbDir = transform.position.x > sourcePosition.x ? 1f : -1f;
+        rb.linearVelocity  = new Vector2(kbDir * knockbackForce, rb.linearVelocity.y);
+        knockbackRemaining = knockbackDuration;
+
+        if (currentHealth <= 0f) Die();
+    }
+
+    /// <summary>Called by PlayerGuard on a successful parry ONLY.</summary>
     public void TakeParryCounter(float amount, Vector3 sourcePosition)
     {
         if (isDead) return;
-
         AlertToPlayer();
 
         isAttacking         = false;
@@ -402,29 +423,14 @@ public class DespairAI : MonoBehaviour
         rb.linearVelocity  = new Vector2(kbDir * parryKnockbackForce, rb.linearVelocity.y);
         knockbackRemaining = parryKnockbackDuration;
 
-        Flip(kbDir > 0f ? -1 : 1);
+        Flip(kbDir > 0f ? -1 : 1);   // shoved away, still facing the player
 
         if (anim != null)
         {
             anim.SetBool(AnimWalk, false);
             anim.ResetTrigger(AnimAttack);
-            if (playParryKnockbackAnim)
-                anim.SetTrigger(AnimKnockback);
+            if (playParryKnockbackAnim) anim.SetTrigger(AnimKnockback);
         }
-
-        if (currentHealth <= 0f) Die();
-    }
-
-    public void TakeDamage(float amount, Vector3 sourcePosition)
-    {
-        if (!isDead) AlertToPlayer();
-
-        if (isDead) return;
-        currentHealth -= amount;
-
-        float kbDir = transform.position.x > sourcePosition.x ? 1f : -1f;
-        rb.linearVelocity  = new Vector2(kbDir * knockbackForce, rb.linearVelocity.y);
-        knockbackRemaining = knockbackDuration;
 
         if (currentHealth <= 0f) Die();
     }
@@ -449,22 +455,16 @@ public class DespairAI : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     //  HELPERS
     // ─────────────────────────────────────────────────────────
-    private float baseColOffsetX;
-
-    private void Start()
-    {
-        if (col != null) baseColOffsetX = col.offset.x;
-    }
-
     private void Flip(int dir)
     {
         if (graphics == null) return;
-        sr.flipX = false;
+
+        if (sr != null) sr.flipX = false;
+
         Vector3 s = graphics.localScale;
         s.x = Mathf.Abs(s.x) * dir;
         graphics.localScale = s;
 
-        // Flip collider offset to follow sprite
         if (col != null)
         {
             Vector2 o = col.offset;
@@ -473,40 +473,85 @@ public class DespairAI : MonoBehaviour
         }
     }
 
+    // ─────────────────────────────────────────────────────────
+    //  DEBUG READOUT
+    // ─────────────────────────────────────────────────────────
+    private void LogRange()
+    {
+        if (!logRangeToConsole || player == null || isDead) return;
+
+        logTimer -= Time.deltaTime;
+        if (logTimer > 0f) return;
+        logTimer = Mathf.Max(0.1f, logInterval);
+
+        float dx = DistX();
+        float dy = DistY();
+
+        Debug.Log(
+            $"[Despair] dx={dx:F2}/{attackRange:F2} {(dx <= attackRange ? "OK" : "FAR")}  " +
+            $"dy={dy:F2}/{maxVerticalAttackDistance:F2} {(dy <= maxVerticalAttackDistance ? "OK" : "FAR")}  " +
+            $"| aggro={isAggro} inRange={InAttackRange()} cd={attackCooldownRemaining:F2} " +
+            $"attacking={isAttacking} kb={knockbackRemaining:F2}  " +
+            $"| me=({OriginX():F2},{OriginY():F2}) plr=({PlayerX():F2},{PlayerY():F2}) " +
+            $"{(playerCol != null ? "collider" : "PIVOT-FALLBACK")}  " +
+            $"| ground={GroundAhead(facingDir)} wall={WallAhead(facingDir)}");
+    }
+
+    private void OnGUI()
+    {
+        if (!showRangeDebug || player == null || isDead) return;
+
+        float dx = DistX();
+        float dy = DistY();
+
+        bool okX = dx <= attackRange;
+        bool okY = dy <= maxVerticalAttackDistance;
+
+        var style = new GUIStyle(GUI.skin.label) { fontSize = 14, fontStyle = FontStyle.Bold };
+        style.normal.textColor = (okX && okY) ? Color.green : Color.yellow;
+
+        // Fixed screen position. Camera.main returns null unless a camera is
+        // tagged MainCamera, which previously pushed this label off-screen.
+        GUI.Label(new Rect(12f, 12f, 700f, 90f),
+            $"dx {dx:F2} / {attackRange:F2} {(okX ? "OK" : "FAR")}\n" +
+            $"dy {dy:F2} / {maxVerticalAttackDistance:F2} {(okY ? "OK" : "FAR")}\n" +
+            $"aggro={isAggro}  cd={attackCooldownRemaining:F2}\n" +
+            $"me.y {OriginY():F2}  player.y {PlayerY():F2}  " +
+            $"{(playerCol != null ? "collider" : "PIVOT-FALLBACK")}", style);
+    }
+
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        float sx = transform.position.x + graphicsOffsetX;
-        float sy = transform.position.y + graphicsOffsetY;
+        // Uses the SAME origin as the AI, so the gizmo can never lie again.
+        float ox = Application.isPlaying || col != null
+            ? (col != null ? col.bounds.center.x : transform.position.x)
+            : transform.position.x;
+        float oy = col != null ? col.bounds.center.y : transform.position.y;
+        Vector3 o = new Vector3(ox, oy, 0f);
 
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(new Vector3(sx, sy, 0f), attackRange);
+        Gizmos.color = Color.red;                                   // attack
+        Gizmos.DrawWireCube(o, new Vector3(attackRange * 2f, maxVerticalAttackDistance * 2f, 0f));
 
-        // Detection box — where Despair first spots the player
-        Gizmos.color = new Color(1f, 0.92f, 0.2f, 1f);
-        Gizmos.DrawWireCube(new Vector3(sx, sy, 0f),
-            new Vector3(detectionRange * 2f, maxVerticalDetection * 2f, 0f));
+        Gizmos.color = new Color(1f, 0.92f, 0.2f, 1f);              // detection
+        Gizmos.DrawWireCube(o, new Vector3(detectionRange * 2f, maxVerticalDetection * 2f, 0f));
 
-        // Lose-aggro box — chases until the player leaves this
-        Gizmos.color = new Color(1f, 0.45f, 0f, 1f);
-        Gizmos.DrawWireCube(new Vector3(sx, sy, 0f),
-            new Vector3(loseAggroRange * 2f, maxVerticalDetection * 2f, 0f));
+        Gizmos.color = new Color(1f, 0.45f, 0f, 1f);                // lose aggro
+        Gizmos.DrawWireCube(o, new Vector3(loseAggroRange * 2f, maxVerticalDetection * 2f, 0f));
 
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawLine(
-            new Vector3(spawnPos.x - patrolDistance, sy, 0f),
-            new Vector3(spawnPos.x + patrolDistance, sy, 0f));
+        Gizmos.color = Color.yellow;                                // patrol bounds
+        Vector3 sp = Application.isPlaying ? spawnPos : transform.position;
+        Gizmos.DrawLine(new Vector3(sp.x - patrolDistance, oy, 0f),
+                        new Vector3(sp.x + patrolDistance, oy, 0f));
 
         int dir = Application.isPlaying ? facingDir : 1;
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawRay(
-            new Vector2(sx + dir * edgeRayOffsetX, sy),
-            Vector2.down * edgeRayLength);
+        float fy = col != null ? col.bounds.min.y : transform.position.y;
 
-        Gizmos.color = Color.blue;
-        Gizmos.DrawRay(
-            new Vector2(sx, sy),
-            new Vector2(dir, 0f) * wallRayLength);
+        Gizmos.color = Color.cyan;                                  // edge ray
+        Gizmos.DrawRay(new Vector2(ox + dir * edgeRayOffsetX, fy), Vector2.down * edgeRayLength);
+
+        Gizmos.color = Color.blue;                                  // wall ray
+        Gizmos.DrawRay(new Vector2(ox, fy + 0.5f), new Vector2(dir, 0f) * wallRayLength);
     }
 #endif
 }

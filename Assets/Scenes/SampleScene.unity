@@ -4829,7 +4829,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -277.8, y: -132.76402, z: -10}
+  m_LocalPosition: {x: -277.8, y: -134.35037, z: -10}
   m_LocalScale: {x: 0.6, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -10023,6 +10023,8 @@ GameObject:
   - component: {fileID: 991138221}
   - component: {fileID: 991138224}
   - component: {fileID: 991138223}
+  - component: {fileID: 991138226}
+  - component: {fileID: 991138225}
   m_Layer: 3
   m_Name: MediumRock (8)
   m_TagString: Untagged
@@ -10038,13 +10040,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 991138220}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0.12609482, w: -0.9920182}
-  m_LocalPosition: {x: 238.7, y: 16.4, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: -0.00854864, w: 0.99996346}
+  m_LocalPosition: {x: 237.5802, y: 16.400002, z: 0}
   m_LocalScale: {x: 1.9813973, y: 1.4710081, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1890040160}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -14.488}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -0.98}
 --- !u!68 &991138223
 EdgeCollider2D:
   m_ObjectHideFlags: 0
@@ -10147,6 +10149,77 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &991138225
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 991138220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5536cfe9aa46ce34db0cba174e1c04a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MovingPlatform
+  moveType: 1
+  moveSpeed: 2
+  moveDistance: 4
+  circleRadius: 3
+  circleSpeed: 1
+  diagonalAngleDegrees: 45
+  easeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  pauseDuration: 0.3
+  startAtCenter: 0
+--- !u!50 &991138226
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 991138220}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 1
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 1
+  m_Constraints: 0
 --- !u!1 &1005861938
 GameObject:
   m_ObjectHideFlags: 0
@@ -11181,6 +11254,7 @@ GameObject:
   - component: {fileID: 1143491709}
   - component: {fileID: 1143491708}
   - component: {fileID: 1143491711}
+  - component: {fileID: 1143491712}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -11197,7 +11271,7 @@ Transform:
   m_GameObject: {fileID: 1143491691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -277.8, y: -139.1, z: 0}
+  m_LocalPosition: {x: -277.8, y: -141.8, z: 0}
   m_LocalScale: {x: 1.1137476, y: 1.1836817, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11438,6 +11512,7 @@ MonoBehaviour:
   parryCutType: 0
   slideOnBlock: 1
   logGuardEvents: 0
+  showOnScreenDebug: 1
 --- !u!114 &1143491706
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11565,6 +11640,40 @@ MonoBehaviour:
   gritCount: 8
   gritSize: 0.1
   gritLifetime: 0.55
+--- !u!114 &1143491712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1143491691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a78aff63d7b316429d2d9b72df395df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RiposteLightning
+  boltPrefab: {fileID: 0}
+  prefabLifetime: 1.5
+  strikeHeight: 10.01
+  segments: 71
+  jaggedness: 1.79
+  boltWidth: 1.89
+  branchCount: 3
+  branchSegments: 5
+  branchLength: 1.6
+  branchWidthScale: 0.5
+  coreColor: {r: 1, g: 1, b: 1, a: 1}
+  glowColor: {r: 0.55, g: 0.75, b: 1, a: 1}
+  glowWidthScale: 3
+  sortingOrder: 30
+  sortingLayerName: Default
+  duration: 0.35
+  flickerCount: 4
+  shakeCamera: 1
+  shakeDuration: 0.18
+  shakeMagnitude: 0.22
+  strikeSound: {fileID: 0}
+  strikeVolume: 0.9
 --- !u!1 &1149431346
 GameObject:
   m_ObjectHideFlags: 0
@@ -11729,7 +11838,7 @@ Transform:
   m_GameObject: {fileID: 1160628902}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -247.4, y: -136.2, z: 0}
+  m_LocalPosition: {x: -247.4, y: -138.02, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11794,18 +11903,17 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  detectionRange: 9
+  detectionRange: 12.71
   maxVerticalDetection: 3
-  loseAggroRange: 18
-  aggroMemoryDuration: 5
-  chaseSpeed: 3.2
+  loseAggroRange: 14
+  aggroMemoryDuration: 10.07
+  chaseSpeed: 6.63
   stopAtLedges: 1
   holdGroundWhenInRange: 1
-  logAggro: 0
-  attackRange: 5
-  attackCooldown: 3
+  attackRange: 4
+  attackCooldown: 1.2
   attackDamage: 5
-  maxVerticalAttackDistance: 5
+  maxVerticalAttackDistance: 2
   attackAnimDuration: 0.8
   damageTimingFraction: 0.5
   useAnimationEventForDamage: 0
@@ -11816,8 +11924,10 @@ MonoBehaviour:
   parryKnockbackForce: 8
   parryKnockbackDuration: 0.47
   playParryKnockbackAnim: 1
-  graphicsOffsetX: -10.17
-  graphicsOffsetY: -1.43
+  logAggro: 0
+  showRangeDebug: 0
+  logRangeToConsole: 0
+  logInterval: 0.5
 --- !u!50 &1160628907
 Rigidbody2D:
   serializedVersion: 5
@@ -13330,7 +13440,7 @@ Transform:
   m_GameObject: {fileID: 1290960523}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -277.8, y: -132.76402, z: -10}
+  m_LocalPosition: {x: -277.8, y: -135.46402, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
