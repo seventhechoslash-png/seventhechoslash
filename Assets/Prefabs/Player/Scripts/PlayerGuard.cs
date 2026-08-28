@@ -19,6 +19,16 @@ public class PlayerGuard : MonoBehaviour
     [Header("References")]
     public LaserBlockEffect blockEffect;
 
+    [Header("Guard Impact Point")]
+    [Tooltip("Where block/parry sparks appear. Drag a child marker at sword/chest height.\nLeft empty, the collider CENTRE is used - never the root pivot, which sits at\nthe feet and is why sparks appeared on the ground.")]
+    public Transform guardPoint;
+    [Tooltip("Ignore the hit point the enemy passes in. Enemies send player.position,\nwhich is the root pivot at ground level - almost never where a block lands.")]
+    public bool overrideEnemyHitPoint = true;
+    [Tooltip("Push the impact point this far toward the attacker, so the spark sits\nbetween the two bodies rather than inside yours.")]
+    public float guardPointForwardOffset = 0.6f;
+    [Tooltip("Extra height above the collider centre. Only used when guardPoint is empty.")]
+    public float guardPointHeightOffset = 0.2f;
+
     [Header("Parry Window")]
     [Tooltip("Seconds after raising guard during which a block counts as a parry.\nEnemy wind-ups are long (Despair lands damage 0.4s after the swing starts),\nso this needs to cover your reaction time PLUS the remaining wind-up.\nTurn on Log Guard Events and read the reported timing to tune it exactly.")]
     [Range(0.02f, 1.5f)]
@@ -33,6 +43,54 @@ public class PlayerGuard : MonoBehaviour
 
     [Tooltip("Which death animation a parry kill plays.")]
     public EnemyDeathEffect.CutType parryCutType = EnemyDeathEffect.CutType.Horizontal;
+
+    [Header("Riposte (parry -> vertical attack)")]
+    [Tooltip("Seconds after a successful parry during which pressing V counts as a riposte.")]
+    [Range(0.1f, 2f)]
+    public float riposteWindow = 0.7f;
+    [Tooltip("Lightning strikes the enemy you parried. If it died, strikes in front of the player.")]
+    public bool riposteStrikesParriedEnemy = true;
+    [Tooltip("Fallback strike distance ahead of the player when there is no target.")]
+    public float riposteFallbackDistance = 2f;
+    [Tooltip("Extra damage dealt to the parried enemy on a riposte. 0 = VFX only.")]
+    public float riposteBonusDamage = 0f;
+
+    [Header("Riposte Aura (EWGF-style)")]
+    [Tooltip("Charge crackles on the player/sword BEFORE the bolt leaves.")]
+    public bool auraOnPlayer = true;
+    [Tooltip("Keep this SHORT. A long player aura lingers after the bolt has left\nand reads as the lightning coming back to you.")]
+    public float playerAuraDuration = 0.20f;
+    [Tooltip("Lead time between the charge appearing and the bolt firing.\nThis is what makes the discharge read as leaving the sword.")]
+    public float chargeLeadTime = 0.07f;
+    [Tooltip("Wrap the PARRIED ENEMY too - the electricity crawls over their body.")]
+    public bool auraOnEnemy = true;
+    public float enemyAuraDuration = 0.8f;
+    [Tooltip("Delay AFTER the bolt fires before the enemy lights up - the travel time.")]
+    public float enemyAuraDelay = 0.06f;
+    [Header("Slash Arc")]
+    [Tooltip("Trace the electricity along the katana SWING ARC instead of firing a straight bolt.")]
+    public bool useSlashArc = true;
+    [Tooltip("Also fire the straight bolt. Usually off when the arc is on - two shapes fight.")]
+    public bool useStraightBolt = false;
+
+    [Header("Enemy Shock Reaction")]
+    [Tooltip("Flash the struck enemy's sprite so it reads as being electrified.")]
+    public bool enemyShockFlash = true;
+    [ColorUsage(true, true)]
+    public Color enemyShockColor = new Color(2.2f, 2.6f, 3.4f, 1f);
+    public float enemyShockFlashDuration = 0.10f;
+    [Tooltip("Number of bright/normal pulses while the enemy is being shocked.")]
+    [Range(1, 8)] public int enemyShockPulses = 4;
+
+    [Header("Scene Lighting")]
+    [Tooltip("Throw real light into the scene when the bolt fires, so the discharge\nilluminates both characters instead of only being drawn over them.")]
+    public bool flashSceneLight = true;
+    public float lightFlashDuration = 0.35f;
+
+    [Tooltip("Enemy bolts run top-to-bottom THROUGH the body rather than wreathing around it.")]
+    public ElectricAura.AuraMode enemyAuraMode = ElectricAura.AuraMode.ThroughBody;
+    [Tooltip("Bolts on the enemy. More than the player reads as being overwhelmed.")]
+    public int enemyBoltCount = 7;
 
     [Header("Guard Pushback")]
     [Tooltip("Slide backwards when an attack is blocked. Tuned on PlayerHealth.")]
@@ -50,6 +108,18 @@ public class PlayerGuard : MonoBehaviour
 
     private float guardRaisedTime = -999f;
     private bool wasGuarding;
+
+    // ── Riposte ──
+    private PlayerState playerState;
+    private RiposteLightning lightning;
+    private ElectricAura playerAura;
+    private ElectricFlashLight flashLight;
+    private ElectricSlashArc slashArc;
+    private float lastParryTime = -999f;
+    private GameObject lastParriedAttacker;
+    private bool wasVerticalAttacking;
+    private Transform graphics;
+    private Collider2D ownCollider;
 
     // ── Debug readout ──
     private string lastResult = "-";
@@ -78,7 +148,40 @@ public class PlayerGuard : MonoBehaviour
 
         if (blockEffect == null)
             blockEffect = GetComponentInChildren<LaserBlockEffect>();
+
+        ownCollider = GetComponent<Collider2D>();
+        if (ownCollider == null) ownCollider = GetComponentInChildren<Collider2D>();
+
+        if (guardPoint == null)
+        {
+            Transform found = transform.Find("Graphics/KatanaTip") ?? transform.Find("KatanaTip");
+            if (found != null) guardPoint = found;
+        }
+
+        playerState = GetComponent<PlayerState>();
+        lightning   = GetComponent<RiposteLightning>();
+        playerAura  = GetComponent<ElectricAura>();
+        flashLight  = GetComponent<ElectricFlashLight>();
+        slashArc    = GetComponent<ElectricSlashArc>();
+
+        // Read facing straight off the sprite so this does not depend on
+        // PlayerMovement exposing a Facing accessor.
+        Transform g = transform.Find("Graphics");
+        if (g != null) graphics = g;
+        else
+        {
+            SpriteRenderer srr = GetComponentInChildren<SpriteRenderer>();
+            graphics = srr != null ? srr.transform : transform;
+        }
+
+        if (lightning == null)
+            Debug.LogWarning("[PlayerGuard] No RiposteLightning component found on the player. " +
+                             "Add it to enable the parry -> vertical attack lightning.");
     }
+
+    /// <summary>True while a parry riposte can still be triggered.</summary>
+    public bool IsRiposteWindowOpen =>
+        (Time.unscaledTime - lastParryTime) <= riposteWindow;
 
     void Update()
     {
@@ -92,6 +195,50 @@ public class PlayerGuard : MonoBehaviour
         }
 
         wasGuarding = guarding;
+
+        CheckRiposte();
+    }
+
+    /// <summary>
+    /// Watches for the vertical attack starting inside the riposte window.
+    /// Reads PlayerState.isVerticalAttacking, so PlayerCombat needs no changes.
+    /// </summary>
+    private void CheckRiposte()
+    {
+        if (playerState == null) return;
+
+        bool vertical = playerState.isVerticalAttacking;
+
+        // Rising edge only - one riposte per swing.
+        if (vertical && !wasVerticalAttacking && IsRiposteWindowOpen)
+            FireRiposte();
+
+        wasVerticalAttacking = vertical;
+    }
+
+    private void FireRiposte()
+    {
+        lastParryTime = -999f;   // consume the window
+
+        Vector3 target;
+
+        if (riposteStrikesParriedEnemy && lastParriedAttacker != null)
+        {
+            target = lastParriedAttacker.transform.position;
+        }
+        else
+        {
+            float facing = graphics != null ? Mathf.Sign(graphics.localScale.x) : 1f;
+            target = transform.position + Vector3.right * facing * riposteFallbackDistance;
+        }
+
+        StartCoroutine(RiposteSequence(target, lastParriedAttacker));
+
+        if (riposteBonusDamage > 0f && lastParriedAttacker != null)
+            ApplyParryCounterDamage(lastParriedAttacker, riposteBonusDamage);
+
+        if (logGuardEvents)
+            Debug.Log($"<color=cyan>[Guard] RIPOSTE</color> lightning at {target}");
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -123,10 +270,14 @@ public class PlayerGuard : MonoBehaviour
     {
         bool isParry = IsParryWindowOpen;
 
+        Vector3 fxPoint = overrideEnemyHitPoint
+            ? ResolveGuardPoint(attacker)
+            : (Vector3)hitPoint;
+
         if (blockEffect != null)
         {
-            if (isParry) blockEffect.PlayParryEffect(hitPoint);
-            else         blockEffect.PlayBlockEffect(hitPoint);
+            if (isParry) blockEffect.PlayParryEffect(fxPoint);
+            else         blockEffect.PlayBlockEffect(fxPoint);
         }
 
         if (slideOnBlock && playerHealth != null)
@@ -136,6 +287,9 @@ public class PlayerGuard : MonoBehaviour
         {
             // Consume the window so holding guard can't chain parries off one press.
             guardRaisedTime = -999f;
+
+            lastParryTime       = Time.unscaledTime;
+            lastParriedAttacker = attacker;
 
             if (parryDamagesAttacker && attacker != null)
                 ApplyParryCounter(attacker);
@@ -187,6 +341,48 @@ public class PlayerGuard : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Where the block visually happened. Enemies pass their own idea of a hit
+    /// point, but ProwlerAI sends player.position and DespairAI derives from
+    /// transform.position - both the root pivot at the feet. This computes it
+    /// from the collider instead, nudged toward the attacker.
+    /// </summary>
+    private Vector3 ResolveGuardPoint(GameObject attacker)
+    {
+        Vector3 basePos;
+
+        if (guardPoint != null)
+        {
+            basePos = guardPoint.position;
+        }
+        else if (ownCollider != null)
+        {
+            basePos = ownCollider.bounds.center + Vector3.up * guardPointHeightOffset;
+        }
+        else
+        {
+            basePos = transform.position + Vector3.up * 1.5f;
+        }
+
+        // Nudge toward the attacker so the spark sits between the two bodies.
+        if (attacker != null && guardPointForwardOffset != 0f)
+        {
+            Vector3 dir = attacker.transform.position - basePos;
+            dir.z = 0f;
+            if (dir.sqrMagnitude > 0.0001f)
+                basePos += dir.normalized * guardPointForwardOffset;
+        }
+        else if (guardPointForwardOffset != 0f)
+        {
+            // No attacker reference - fall back to facing.
+            float facing = graphics != null ? Mathf.Sign(graphics.localScale.x) : 1f;
+            basePos += Vector3.right * facing * guardPointForwardOffset;
+        }
+
+        basePos.z = 0f;
+        return basePos;
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     //  PARRY COUNTER-DAMAGE
     // ═══════════════════════════════════════════════════════════════════════
@@ -196,16 +392,118 @@ public class PlayerGuard : MonoBehaviour
     /// what a katana swing would. Searches parents too, since the collider that
     /// reached us may be a child of the enemy root.
     /// </summary>
+    /// <summary>
+    /// Three beats, in order, so the discharge reads as leaving the sword:
+    ///   1. charge crackles on the player
+    ///   2. bolt fires from the katana toward the enemy
+    ///   3. enemy's body conducts it
+    /// Firing these simultaneously is what made it look like the lightning
+    /// travelled to the enemy and then came back.
+    /// </summary>
+    private System.Collections.IEnumerator RiposteSequence(Vector3 target, GameObject attacker)
+    {
+        // ── Beat 1: charge on the player / sword ──
+        if (auraOnPlayer && playerAura != null)
+            playerAura.Play(transform, playerAuraDuration);
+
+        if (chargeLeadTime > 0f)
+            yield return new WaitForSecondsRealtime(chargeLeadTime);
+
+        // ── Beat 2: the electricity follows the blade ──
+        if (useSlashArc && slashArc != null)
+            slashArc.Slash();
+
+        if (useStraightBolt && lightning != null)
+            lightning.Strike(target);
+
+        // Light the scene from the impact point, not the player - the discharge
+        // is brightest where it lands.
+        if (flashSceneLight && flashLight != null)
+            flashLight.Flash(target, lightFlashDuration);
+
+        if (enemyAuraDelay > 0f)
+            yield return new WaitForSecondsRealtime(enemyAuraDelay);
+
+        // ── Beat 3: the enemy conducts ──
+        if (enemyShockFlash && attacker != null)
+            StartCoroutine(ShockFlash(attacker));
+
+        if (auraOnEnemy && attacker != null)
+            yield return EnemyAura(attacker.transform);
+    }
+
+    /// <summary>
+    /// Pulses the enemy's sprite bright blue-white, so the body visibly reacts
+    /// to the current instead of only having arcs drawn over it.
+    /// </summary>
+    private System.Collections.IEnumerator ShockFlash(GameObject enemy)
+    {
+        SpriteRenderer sr = enemy.GetComponent<SpriteRenderer>();
+        if (sr == null) sr = enemy.GetComponentInChildren<SpriteRenderer>();
+        if (sr == null) yield break;
+
+        Color original = sr.color;
+        float half = enemyShockFlashDuration * 0.5f;
+
+        for (int i = 0; i < enemyShockPulses; i++)
+        {
+            if (sr == null) yield break;
+
+            sr.color = enemyShockColor;
+            yield return new WaitForSecondsRealtime(half);
+
+            if (sr == null) yield break;
+
+            sr.color = original;
+            yield return new WaitForSecondsRealtime(half);
+        }
+
+        if (sr != null) sr.color = original;
+    }
+
+    /// <summary>
+    /// Enemies rarely carry their own ElectricAura, so one is added on demand
+    /// and configured to match the player's, then left on the enemy for reuse.
+    /// </summary>
+    private System.Collections.IEnumerator EnemyAura(Transform enemy)
+    {
+        if (enemy == null) yield break;
+
+        ElectricAura aura = enemy.GetComponent<ElectricAura>();
+        if (aura == null)
+        {
+            aura = enemy.gameObject.AddComponent<ElectricAura>();
+
+            aura.CopyTuningFrom(playerAura);
+
+            // The enemy is being shocked, not charging a punch — no hand burst.
+            aura.showFocusBurst = false;
+        }
+
+        // Re-applied every riposte so Inspector tweaks take effect immediately.
+        aura.CopyTuningFrom(playerAura);
+        aura.mode           = enemyAuraMode;
+        aura.boltCount      = enemyBoltCount;
+        aura.showFocusBurst = false;
+
+        aura.Play(enemy, enemyAuraDuration);
+    }
+
     private void ApplyParryCounter(GameObject attacker)
+    {
+        ApplyParryCounterDamage(attacker, parryCounterDamage);
+    }
+
+    private void ApplyParryCounterDamage(GameObject attacker, float damage)
     {
         // ── Despair — real health pool, takes a damage amount and knockback ──
         DespairAI despair = attacker.GetComponent<DespairAI>()
                          ?? attacker.GetComponentInParent<DespairAI>();
         if (despair != null)
         {
-            despair.TakeParryCounter(parryCounterDamage, transform.position);
+            despair.TakeParryCounter(damage, transform.position);
             if (logGuardEvents)
-                Debug.Log($"[Parry] {parryCounterDamage} dmg -> DespairAI");
+                Debug.Log($"[Parry] {damage} dmg -> DespairAI");
             return;
         }
 
@@ -214,9 +512,9 @@ public class PlayerGuard : MonoBehaviour
                              ?? attacker.GetComponentInParent<StalkerHealth>();
         if (stalker != null)
         {
-            stalker.TakeDamage(parryCounterDamage, parryCutType);
+            stalker.TakeDamage(damage, parryCutType);
             if (logGuardEvents)
-                Debug.Log($"[Parry] {parryCounterDamage} dmg -> Stalker");
+                Debug.Log($"[Parry] {damage} dmg -> Stalker");
             return;
         }
 
@@ -225,9 +523,9 @@ public class PlayerGuard : MonoBehaviour
                          ?? attacker.GetComponentInParent<ProwlerAI>();
         if (prowler != null)
         {
-            prowler.TakeDamage(parryCounterDamage, parryCutType, transform.position);
+            prowler.TakeDamage(damage, parryCutType, transform.position);
             if (logGuardEvents)
-                Debug.Log($"[Parry] {parryCounterDamage} dmg -> Prowler");
+                Debug.Log($"[Parry] {damage} dmg -> Prowler");
             return;
         }
 

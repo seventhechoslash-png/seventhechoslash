@@ -21,9 +21,19 @@ public class RiposteLightning : MonoBehaviour
     public GameObject boltPrefab;
     public float prefabLifetime = 1.5f;
 
+    [Header("Origin")]
+    [Tooltip("Where the bolt is fired FROM. Drag your katana / hitbox / hand transform here.\nLeft empty, it auto-finds a child named Katana, KatanaHitbox, Sword or Hand,\nand falls back to a point in front of the player.")]
+    public Transform originPoint;
+    [Tooltip("Used only when originPoint is empty - offset ahead of the player, flipped with facing.")]
+    public Vector2 fallbackOriginOffset = new Vector2(0.7f, 0.3f);
+
+    [Header("Travel Through Target")]
+    [Tooltip("How far the bolt continues PAST the enemy, so it pierces rather than stopping at them.")]
+    public float overshoot = 2.5f;
+    [Tooltip("Seconds for the bolt to extend from the katana to full length. 0 = instant.")]
+    public float travelDuration = 0.06f;
+
     [Header("Bolt Shape")]
-    [Tooltip("How far above the target the bolt starts.")]
-    public float strikeHeight = 7f;
     [Tooltip("Zig-zag points along the main bolt. More = jaggier.")]
     public int segments = 14;
     [Tooltip("Max sideways deviation per segment.")]
@@ -62,10 +72,29 @@ public class RiposteLightning : MonoBehaviour
     private AudioSource audioSource;
     private readonly List<LineRenderer> pool = new List<LineRenderer>();
     private Transform holder;
+    private Transform graphicsT;
 
     void Awake()
     {
         lineMat = MakeUrpLineMaterial();
+
+        Transform g = transform.Find("Graphics");
+        graphicsT = g != null ? g : transform;
+
+        // Auto-find a blade anchor if none was assigned.
+        if (originPoint == null)
+        {
+            string[] names = { "Katana", "KatanaHitbox", "Sword", "Hand", "KatanaTip" };
+            foreach (string n in names)
+            {
+                Transform found = FindDeep(transform, n);
+                if (found != null) { originPoint = found; break; }
+            }
+
+            if (originPoint == null)
+                Debug.LogWarning("[RiposteLightning] No origin transform found. Using the " +
+                                 "fallback offset. Assign Origin Point to your katana for accuracy.");
+        }
 
         holder = new GameObject("RiposteLightning_FX").transform;
         holder.position = Vector3.zero;
@@ -84,18 +113,29 @@ public class RiposteLightning : MonoBehaviour
     //  PUBLIC ENTRY POINT
     // ═════════════════════════════════════════════════════════
 
-    /// <summary>Strike lightning down onto a world position.</summary>
+    /// <summary>
+    /// Fire lightning FROM the katana THROUGH a world position.
+    /// The bolt overshoots the target so it reads as piercing, not landing.
+    /// </summary>
     public void Strike(Vector3 target)
     {
+        Vector3 origin = GetOrigin();
+
+        // Continue past the target along the same heading.
+        Vector3 dir = target - origin;
+        if (dir.sqrMagnitude < 0.0001f) dir = Vector3.right;
+        dir.z = 0f;
+        Vector3 far = target + dir.normalized * overshoot;
+
         if (boltPrefab != null)
         {
-            GameObject go = Instantiate(boltPrefab, target, Quaternion.identity);
+            GameObject go = Instantiate(boltPrefab, origin, Quaternion.identity);
             if (prefabLifetime > 0f) Destroy(go, prefabLifetime);
         }
         else
         {
             StopAllCoroutines();
-            StartCoroutine(BoltRoutine(target));
+            StartCoroutine(BoltRoutine(origin, far));
         }
 
         if (strikeSound != null)
@@ -109,14 +149,28 @@ public class RiposteLightning : MonoBehaviour
     //  PROCEDURAL BOLT
     // ═════════════════════════════════════════════════════════
 
-    private IEnumerator BoltRoutine(Vector3 target)
+    private IEnumerator BoltRoutine(Vector3 origin, Vector3 far)
     {
+        // Extend from the blade outward before settling at full length.
+        if (travelDuration > 0f)
+        {
+            float t = 0f;
+            while (t < travelDuration)
+            {
+                t += Time.unscaledDeltaTime;
+                float reach = Mathf.Clamp01(t / travelDuration);
+                BuildBolt(origin, Vector3.Lerp(origin, far, reach));
+                SetPoolAlpha(1f);
+                yield return null;
+            }
+        }
+
         int flickers = Mathf.Max(1, flickerCount);
         float step = duration / flickers;
 
         for (int f = 0; f < flickers; f++)
         {
-            BuildBolt(target);
+            BuildBolt(origin, far);
 
             // Fade the whole thing out over the last portion.
             float t = (float)f / flickers;
@@ -129,15 +183,14 @@ public class RiposteLightning : MonoBehaviour
         HideAll();
     }
 
-    private void BuildBolt(Vector3 target)
+    private void BuildBolt(Vector3 origin, Vector3 end)
     {
         HideAll();
 
-        Vector3 top = target + Vector3.up * strikeHeight;
         int index = 0;
 
-        // Main bolt: glow pass behind, core pass in front.
-        Vector3[] main = MakeJaggedPath(top, target, segments, jaggedness);
+        // Main bolt runs blade -> through the target.
+        Vector3[] main = MakeJaggedPath(origin, end, segments, jaggedness);
 
         DrawLine(index++, main, glowColor, boltWidth * glowWidthScale, sortingOrder);
         DrawLine(index++, main, coreColor, boltWidth,                  sortingOrder + 1);
@@ -148,16 +201,28 @@ public class RiposteLightning : MonoBehaviour
             int startIdx = Random.Range(2, Mathf.Max(3, main.Length - 2));
             Vector3 start = main[startIdx];
 
-            float dir = Random.value < 0.5f ? -1f : 1f;
-            Vector3 end = start + new Vector3(
-                dir * Random.Range(branchLength * 0.4f, branchLength),
-                -Random.Range(branchLength * 0.3f, branchLength * 0.9f), 0f);
+            // Fork perpendicular-ish to the beam so branches splay off its sides.
+            Vector3 along = (main[main.Length - 1] - main[0]).normalized;
+            Vector3 perp  = new Vector3(-along.y, along.x, 0f) * (Random.value < 0.5f ? -1f : 1f);
 
-            Vector3[] branch = MakeJaggedPath(start, end, branchSegments, jaggedness * 0.7f);
+            Vector3 bend = (perp * Random.Range(0.5f, 1f) + along * Random.Range(0.2f, 0.7f)).normalized;
+            Vector3 bEnd = start + bend * Random.Range(branchLength * 0.4f, branchLength);
+
+            Vector3[] branch = MakeJaggedPath(start, bEnd, branchSegments, jaggedness * 0.7f);
 
             DrawLine(index++, branch, glowColor, boltWidth * glowWidthScale * branchWidthScale, sortingOrder);
             DrawLine(index++, branch, coreColor, boltWidth * branchWidthScale,                  sortingOrder + 1);
         }
+    }
+
+    /// <summary>Resolve where the bolt fires from.</summary>
+    private Vector3 GetOrigin()
+    {
+        if (originPoint != null) return originPoint.position;
+
+        float facing = graphicsT != null ? Mathf.Sign(graphicsT.localScale.x) : 1f;
+        return transform.position + new Vector3(fallbackOriginOffset.x * facing,
+                                               fallbackOriginOffset.y, 0f);
     }
 
     private Vector3[] MakeJaggedPath(Vector3 from, Vector3 to, int segs, float jag)
@@ -192,7 +257,7 @@ public class RiposteLightning : MonoBehaviour
         lr.positionCount = pts.Length;
         lr.SetPositions(pts);
         lr.startWidth = width;
-        lr.endWidth   = width * 0.55f;   // taper toward the ground
+        lr.endWidth   = width * 0.55f;   // taper toward the far end
         lr.startColor = col;
         lr.endColor   = col;
         lr.sortingOrder = order;
@@ -238,6 +303,17 @@ public class RiposteLightning : MonoBehaviour
     {
         foreach (LineRenderer lr in pool)
             lr.gameObject.SetActive(false);
+    }
+
+    private static Transform FindDeep(Transform root, string name)
+    {
+        if (root.name == name) return root;
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform r = FindDeep(root.GetChild(i), name);
+            if (r != null) return r;
+        }
+        return null;
     }
 
     private Material MakeUrpLineMaterial()
