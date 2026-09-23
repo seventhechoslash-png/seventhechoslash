@@ -128,7 +128,6 @@ public class StalkerAI : MonoBehaviour
 
         if (!blocked)
         {
-            // Not guarding — deal damage normally
             PlayerHealth ph = player.GetComponent<PlayerHealth>();
             if (ph != null)
             {
@@ -136,12 +135,9 @@ public class StalkerAI : MonoBehaviour
                 ph.TakeDamage(damage, hitDir);
             }
 
-            // Spawn hit effect on the player
             if (hitEffectPrefab != null)
                 Instantiate(hitEffectPrefab, finalTarget, Quaternion.identity);
         }
-        // If blocked: LaserBlockEffect plays automatically inside TryBlockDamage
-        // No hit effect, no damage
 
         yield return new WaitForSeconds(laserDuration);
 

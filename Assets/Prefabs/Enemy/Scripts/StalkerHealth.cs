@@ -91,6 +91,10 @@ public class StalkerHealth : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
+        // ── CURRENCY DROP ──────────────────────────────────────────
+        GetComponent<EnemyDropper>()?.OnEnemyDeath();
+        // ───────────────────────────────────────────────────────────
+
         EnemyDeathEffect effect = GetComponent<EnemyDeathEffect>();
         if (effect != null)
             effect.PlayDeath(cut);

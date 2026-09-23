@@ -335,6 +335,10 @@ public class ProwlerAI : MonoBehaviour
         StopAllCoroutines();
         rb.linearVelocity = Vector2.zero;
 
+        // ── CURRENCY DROP ──────────────────────────────────────────
+        GetComponent<EnemyDropper>()?.OnEnemyDeath();
+        // ───────────────────────────────────────────────────────────
+
         EnemyDeathEffect effect = GetComponent<EnemyDeathEffect>();
         if (effect != null)
             effect.PlayDeath(cut);

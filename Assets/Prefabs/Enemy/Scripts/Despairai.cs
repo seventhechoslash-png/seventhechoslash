@@ -4,6 +4,14 @@
 //  Robed staff enemy. Patrols platforms, chases the player on
 //  sight, melee attacks in range, reacts to parries.
 //
+//  BLOCK SYSTEM:
+//  - Regular hits roll an 80 % chance to block.
+//  - Parry counter routes through TakeParryCounter() and is
+//    NEVER subject to the block roll — it always lands.
+//  - While blocking: hold position, play "Block" animation.
+//  - Hits that land DURING the block animation are fully absorbed.
+//  - Block has a cooldown so consecutive hits are not all blocked.
+//
 //  IMPORTANT CHANGE vs the previous version:
 //  The old script measured distances from graphics.position but
 //  drew gizmos from transform.position + graphicsOffset. Those are
@@ -20,7 +28,6 @@
 //    5. EnemyDeathEffect on the root.
 //    6. Player GameObject tagged "Player".
 // ============================================================
-
 using UnityEngine;
 using System.Collections;
 
@@ -68,10 +75,8 @@ public class DespairAI : MonoBehaviour
     [Tooltip("Vertical reach, ABSOLUTE - blocks swings at a player far above OR below.")]
     public float maxVerticalAttackDistance = 2.0f;
     public float attackAnimDuration = 0.8f;
-
     [Tooltip("Delay before damage lands, as a fraction of the attack anim.\nIGNORED when useAnimationEventForDamage is ON.")]
     [Range(0f, 1f)] public float damageTimingFraction = 0.5f;
-
     [Tooltip("ON  = damage fires from an Animation Event calling DealMeleeDamage() (survives retiming).\nOFF = damage fires on a timer at damageTimingFraction.")]
     public bool useAnimationEventForDamage = false;
 
@@ -90,6 +95,22 @@ public class DespairAI : MonoBehaviour
     public float parryKnockbackDuration = 0.47f;
     public bool  playParryKnockbackAnim = true;
 
+    // ── BLOCK SYSTEM ──────────────────────────────────────────
+    // Regular player attacks roll blockChance to be blocked.
+    // PARRY attacks are routed through TakeParryCounter() and
+    // bypass this system entirely — they always deal full damage.
+    [Header("Guard / Block")]
+    [Range(0f, 1f)]
+    [Tooltip("0 = never blocks, 1 = blocks every hit. Default 0.8 = 80 %.")]
+    public float blockChance = 0.80f;
+
+    [Tooltip("How long the block animation plays before Despair returns to normal.\nMatch this to your Block clip length.")]
+    public float blockAnimDuration = 0.5f;
+
+    [Tooltip("Seconds after a successful block before Despair can block again.\nSet to ~0.3 to match player attack speed.")]
+    public float blockCooldown = 0.3f;
+    // ─────────────────────────────────────────────────────────
+
     [Header("Debug")]
     [Tooltip("Logs aggro changes.")]
     public bool logAggro = false;
@@ -103,6 +124,7 @@ public class DespairAI : MonoBehaviour
     private static readonly int AnimWalk      = Animator.StringToHash("walk");
     private static readonly int AnimAttack    = Animator.StringToHash("attack");
     private static readonly int AnimKnockback = Animator.StringToHash("knockback");
+    private static readonly int AnimBlock     = Animator.StringToHash("isBlocking"); // Bool
 
     // ── State ──
     private float currentHealth;
@@ -119,16 +141,17 @@ public class DespairAI : MonoBehaviour
     private float baseColOffsetX;
     private float logTimer;
 
+    // ── Block state ──
+    private bool  isBlocking;
+    private float blockAnimRemaining;
+    private float blockCooldownRemaining;
+
     // ═════════════════════════════════════════════════════════
     //  ONE MEASUREMENT ORIGIN
-    //  Every distance check AND every gizmo uses these. If the
-    //  gizmo looks wrong, the AI is wrong, and vice versa.
     // ═════════════════════════════════════════════════════════
     private float OriginX() => col != null ? col.bounds.center.x : transform.position.x;
     private float OriginY() => col != null ? col.bounds.center.y : transform.position.y;
-
-    /// <summary>Bottom of the collider - used for ground rays only.</summary>
-    private float FeetY() => col != null ? col.bounds.min.y : transform.position.y;
+    private float FeetY()   => col != null ? col.bounds.min.y    : transform.position.y;
 
     // ─────────────────────────────────────────────────────────
     private void Awake()
@@ -156,7 +179,6 @@ public class DespairAI : MonoBehaviour
 
         currentHealth = maxHealth;
         spawnPos      = transform.position;
-
         if (col != null) baseColOffsetX = col.offset.x;
 
         if (groundLayer.value == 0)
@@ -170,15 +192,32 @@ public class DespairAI : MonoBehaviour
     {
         if (isDead) return;
 
+        // ── Cooldown tickers – always run regardless of state ──
         attackCooldownRemaining = Mathf.Max(0f, attackCooldownRemaining - Time.deltaTime);
+        blockCooldownRemaining  = Mathf.Max(0f, blockCooldownRemaining  - Time.deltaTime);
 
-        // Knockback outranks isAttacking - a parry always lands mid-swing.
+        // ── Knockback stun ──
         if (knockbackRemaining > 0f)
         {
             knockbackRemaining -= Time.deltaTime;
             return;
         }
 
+        // ── Block animation – hold still until clip finishes ──
+        if (isBlocking)
+        {
+            blockAnimRemaining -= Time.deltaTime;
+            if (blockAnimRemaining <= 0f)
+            {
+                isBlocking = false;
+                if (anim != null) anim.SetBool(AnimBlock, false);
+            }
+            // Freeze horizontal movement for the block duration
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            return;
+        }
+
+        // ── Attack animation ──
         if (isAttacking)
         {
             attackAnimRemaining -= Time.deltaTime;
@@ -198,14 +237,12 @@ public class DespairAI : MonoBehaviour
                     StartAttack();
                     return;
                 }
-
                 if (holdGroundWhenInRange)
                 {
                     HoldPosition();
                     return;
                 }
             }
-
             Chase();
             return;
         }
@@ -216,16 +253,10 @@ public class DespairAI : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     //  DISTANCE TO PLAYER
     // ─────────────────────────────────────────────────────────
-    // Measure CENTRE to CENTRE. player.position is the root pivot, which on a
-    // platformer sits at the FEET, while OriginY() is Despair's chest. Comparing
-    // those two made dy read ~2 while standing on the same floor, and ~0 while
-    // standing on his head - so he refused to swing at ground level and only
-    // attacked when you jumped on him.
     private float PlayerX() => playerCol != null ? playerCol.bounds.center.x : player.position.x;
     private float PlayerY() => playerCol != null ? playerCol.bounds.center.y : player.position.y;
-
-    private float DistX() => Mathf.Abs(PlayerX() - OriginX());
-    private float DistY() => Mathf.Abs(PlayerY() - OriginY());
+    private float DistX()   => Mathf.Abs(PlayerX() - OriginX());
+    private float DistY()   => Mathf.Abs(PlayerY() - OriginY());
 
     // ─────────────────────────────────────────────────────────
     //  AGGRO
@@ -263,7 +294,6 @@ public class DespairAI : MonoBehaviour
         }
     }
 
-    /// <summary>Force aggro - used when damaged so it fights back if hit from range.</summary>
     public void AlertToPlayer()
     {
         isAggro = true;
@@ -292,10 +322,7 @@ public class DespairAI : MonoBehaviour
     private void HoldPosition()
     {
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-
-        if (player != null)
-            Flip(PlayerX() > OriginX() ? 1 : -1);
-
+        if (player != null) Flip(PlayerX() > OriginX() ? 1 : -1);
         if (anim != null) anim.SetBool(AnimWalk, false);
     }
 
@@ -303,7 +330,6 @@ public class DespairAI : MonoBehaviour
     {
         if (OriginX() > spawnPos.x + patrolDistance) facingDir = -1;
         if (OriginX() < spawnPos.x - patrolDistance) facingDir =  1;
-
         if (!GroundAhead(facingDir)) facingDir = -facingDir;
         if (WallAhead(facingDir))    facingDir = -facingDir;
 
@@ -331,8 +357,6 @@ public class DespairAI : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     //  ATTACK
     // ─────────────────────────────────────────────────────────
-    /// <summary>Range only, ignores cooldown. dy is ABSOLUTE now - the old
-    /// signed check only rejected players ABOVE, never below.</summary>
     private bool InAttackRange()
     {
         if (player == null) return false;
@@ -346,7 +370,6 @@ public class DespairAI : MonoBehaviour
         attackCooldownRemaining = attackCooldown;
 
         rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
-
         Flip(PlayerX() > OriginX() ? 1 : -1);
 
         if (anim != null)
@@ -356,7 +379,6 @@ public class DespairAI : MonoBehaviour
         }
 
         damageDealtThisSwing = false;
-
         if (!useAnimationEventForDamage)
             StartCoroutine(DelayedDamage(attackAnimDuration * damageTimingFraction));
     }
@@ -367,14 +389,12 @@ public class DespairAI : MonoBehaviour
         DealMeleeDamage();
     }
 
-    /// <summary>Called by an Animation Event on the attack clip, or by the timer.</summary>
     public void DealMeleeDamage()
     {
         if (player == null || isDead) return;
         if (damageDealtThisSwing) return;
         damageDealtThisSwing = true;
 
-        // Slightly generous on X so a player edging away still gets clipped.
         if (DistX() > attackRange * 1.15f) return;
         if (DistY() > maxVerticalAttackDistance) return;
 
@@ -389,15 +409,56 @@ public class DespairAI : MonoBehaviour
     // ─────────────────────────────────────────────────────────
     //  TAKE DAMAGE
     // ─────────────────────────────────────────────────────────
+
+    // Called by KatanaHitbox (via DespairHealth routing) for regular swings.
     public void TakeDamage(EnemyDeathEffect.CutType cutType)
     {
         TakeDamage(katanaDamage, player != null ? player.position : transform.position);
     }
 
+    // Core damage handler. Includes the 80 % block roll.
+    // NOTE: TakeParryCounter() never calls this — parry ALWAYS lands.
     public void TakeDamage(float amount, Vector3 sourcePosition)
     {
         if (isDead) return;
+
+        // ── ACTIVE BLOCK — absorb hit completely ──────────────
+        // Any attack that lands while the block animation is still
+        // playing is fully absorbed. No damage, no knockback.
+        // Parry bypasses this entirely via TakeParryCounter().
+        if (isBlocking) return;
+        // ─────────────────────────────────────────────────────
+
         AlertToPlayer();
+
+        // ── BLOCK ROLL ────────────────────────────────────────
+        // Conditions for a valid block attempt:
+        //   • Not currently in knockback stun
+        //   • Not mid-attack (can't guard while swinging)
+        //   • Block cooldown has expired
+if (blockCooldownRemaining <= 0f &&
+    Random.value < blockChance)
+
+        {
+            isBlocking             = true;
+            blockAnimRemaining     = blockAnimDuration;
+            blockCooldownRemaining = blockCooldown;
+
+            // Freeze and face the attacker
+            rb.linearVelocity = new Vector2(0f, rb.linearVelocity.y);
+            int faceDir = transform.position.x > sourcePosition.x ? -1 : 1;
+            Flip(faceDir);
+
+            if (anim != null)
+            {
+                anim.SetBool(AnimWalk, false);
+                anim.ResetTrigger(AnimAttack);
+                anim.SetBool(AnimBlock, true);
+            }
+
+            return; // ← zero damage taken
+        }
+        // ─────────────────────────────────────────────────────
 
         currentHealth -= amount;
 
@@ -408,7 +469,8 @@ public class DespairAI : MonoBehaviour
         if (currentHealth <= 0f) Die();
     }
 
-    /// <summary>Called by PlayerGuard on a successful parry ONLY.</summary>
+    // Called by KatanaHitbox for PARRY counters only.
+    // Skips the block roll entirely — parry ALWAYS lands.
     public void TakeParryCounter(float amount, Vector3 sourcePosition)
     {
         if (isDead) return;
@@ -417,13 +479,20 @@ public class DespairAI : MonoBehaviour
         isAttacking         = false;
         attackAnimRemaining = 0f;
 
+        // Cancel any active block — parry breaks guard
+        if (isBlocking)
+        {
+            isBlocking = false;
+            if (anim != null) anim.SetBool(AnimBlock, false);
+        }
+
         currentHealth -= amount;
 
         float kbDir = transform.position.x > sourcePosition.x ? 1f : -1f;
         rb.linearVelocity  = new Vector2(kbDir * parryKnockbackForce, rb.linearVelocity.y);
         knockbackRemaining = parryKnockbackDuration;
 
-        Flip(kbDir > 0f ? -1 : 1);   // shoved away, still facing the player
+        Flip(kbDir > 0f ? -1 : 1);
 
         if (anim != null)
         {
@@ -447,6 +516,9 @@ public class DespairAI : MonoBehaviour
         rb.bodyType       = RigidbodyType2D.Kinematic;
         if (col != null) col.enabled = false;
 
+        var dropper = GetComponent<EnemyDropper>();
+        if (dropper != null) dropper.OnEnemyDeath();
+
         EnemyDeathEffect deathFx = GetComponent<EnemyDeathEffect>();
         if (deathFx != null) deathFx.PlayDeath(0);
         else Destroy(gameObject, 0.5f);
@@ -458,9 +530,7 @@ public class DespairAI : MonoBehaviour
     private void Flip(int dir)
     {
         if (graphics == null) return;
-
         if (sr != null) sr.flipX = false;
-
         Vector3 s = graphics.localScale;
         s.x = Mathf.Abs(s.x) * dir;
         graphics.localScale = s;
@@ -479,19 +549,17 @@ public class DespairAI : MonoBehaviour
     private void LogRange()
     {
         if (!logRangeToConsole || player == null || isDead) return;
-
         logTimer -= Time.deltaTime;
         if (logTimer > 0f) return;
         logTimer = Mathf.Max(0.1f, logInterval);
 
         float dx = DistX();
         float dy = DistY();
-
         Debug.Log(
             $"[Despair] dx={dx:F2}/{attackRange:F2} {(dx <= attackRange ? "OK" : "FAR")}  " +
             $"dy={dy:F2}/{maxVerticalAttackDistance:F2} {(dy <= maxVerticalAttackDistance ? "OK" : "FAR")}  " +
             $"| aggro={isAggro} inRange={InAttackRange()} cd={attackCooldownRemaining:F2} " +
-            $"attacking={isAttacking} kb={knockbackRemaining:F2}  " +
+            $"attacking={isAttacking} blocking={isBlocking} blockCD={blockCooldownRemaining:F2} kb={knockbackRemaining:F2}  " +
             $"| me=({OriginX():F2},{OriginY():F2}) plr=({PlayerX():F2},{PlayerY():F2}) " +
             $"{(playerCol != null ? "collider" : "PIVOT-FALLBACK")}  " +
             $"| ground={GroundAhead(facingDir)} wall={WallAhead(facingDir)}");
@@ -503,19 +571,17 @@ public class DespairAI : MonoBehaviour
 
         float dx = DistX();
         float dy = DistY();
-
         bool okX = dx <= attackRange;
         bool okY = dy <= maxVerticalAttackDistance;
 
         var style = new GUIStyle(GUI.skin.label) { fontSize = 14, fontStyle = FontStyle.Bold };
-        style.normal.textColor = (okX && okY) ? Color.green : Color.yellow;
+        style.normal.textColor = isBlocking ? Color.cyan : (okX && okY) ? Color.green : Color.yellow;
 
-        // Fixed screen position. Camera.main returns null unless a camera is
-        // tagged MainCamera, which previously pushed this label off-screen.
-        GUI.Label(new Rect(12f, 12f, 700f, 90f),
+        GUI.Label(new Rect(12f, 12f, 700f, 110f),
             $"dx {dx:F2} / {attackRange:F2} {(okX ? "OK" : "FAR")}\n" +
             $"dy {dy:F2} / {maxVerticalAttackDistance:F2} {(okY ? "OK" : "FAR")}\n" +
             $"aggro={isAggro}  cd={attackCooldownRemaining:F2}\n" +
+            $"BLOCKING={isBlocking}  blockCD={blockCooldownRemaining:F2}\n" +
             $"me.y {OriginY():F2}  player.y {PlayerY():F2}  " +
             $"{(playerCol != null ? "collider" : "PIVOT-FALLBACK")}", style);
     }
@@ -523,23 +589,22 @@ public class DespairAI : MonoBehaviour
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        // Uses the SAME origin as the AI, so the gizmo can never lie again.
         float ox = Application.isPlaying || col != null
             ? (col != null ? col.bounds.center.x : transform.position.x)
             : transform.position.x;
         float oy = col != null ? col.bounds.center.y : transform.position.y;
         Vector3 o = new Vector3(ox, oy, 0f);
 
-        Gizmos.color = Color.red;                                   // attack
+        Gizmos.color = Color.red;
         Gizmos.DrawWireCube(o, new Vector3(attackRange * 2f, maxVerticalAttackDistance * 2f, 0f));
 
-        Gizmos.color = new Color(1f, 0.92f, 0.2f, 1f);              // detection
+        Gizmos.color = new Color(1f, 0.92f, 0.2f, 1f);
         Gizmos.DrawWireCube(o, new Vector3(detectionRange * 2f, maxVerticalDetection * 2f, 0f));
 
-        Gizmos.color = new Color(1f, 0.45f, 0f, 1f);                // lose aggro
+        Gizmos.color = new Color(1f, 0.45f, 0f, 1f);
         Gizmos.DrawWireCube(o, new Vector3(loseAggroRange * 2f, maxVerticalDetection * 2f, 0f));
 
-        Gizmos.color = Color.yellow;                                // patrol bounds
+        Gizmos.color = Color.yellow;
         Vector3 sp = Application.isPlaying ? spawnPos : transform.position;
         Gizmos.DrawLine(new Vector3(sp.x - patrolDistance, oy, 0f),
                         new Vector3(sp.x + patrolDistance, oy, 0f));
@@ -547,10 +612,10 @@ public class DespairAI : MonoBehaviour
         int dir = Application.isPlaying ? facingDir : 1;
         float fy = col != null ? col.bounds.min.y : transform.position.y;
 
-        Gizmos.color = Color.cyan;                                  // edge ray
+        Gizmos.color = Color.cyan;
         Gizmos.DrawRay(new Vector2(ox + dir * edgeRayOffsetX, fy), Vector2.down * edgeRayLength);
 
-        Gizmos.color = Color.blue;                                  // wall ray
+        Gizmos.color = Color.blue;
         Gizmos.DrawRay(new Vector2(ox, fy + 0.5f), new Vector2(dir, 0f) * wallRayLength);
     }
 #endif
